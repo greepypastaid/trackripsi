@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { BookOpen, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
@@ -27,11 +27,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ApiError } from '@/services/api'
 import type { Research } from '@/services/types'
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { data: researches, isLoading } = useResearches()
   const createResearch = useCreateResearch()
   const [open, setOpen] = useState(false)
@@ -50,6 +52,8 @@ export function DashboardPage() {
       toast.success('Riset dibuat', { description: `${research.title} siap dengan template Bab 1–5.` })
       setForm({ title: '', field: '', target: '' })
       setOpen(false)
+      // Langsung bawa pengguna ke riset barunya agar alur tidak terputus.
+      navigate(`/researches/${research.id}/overview`)
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Gagal membuat riset.'
       setError(message)
@@ -58,7 +62,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="w-full space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Halo, {user?.name.split(' ')[0]}</h1>
@@ -123,9 +127,10 @@ export function DashboardPage() {
       </header>
 
       {isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-40 animate-pulse rounded-xl bg-muted" />
-          <div className="h-40 animate-pulse rounded-xl bg-muted" />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-40" />
+          ))}
         </div>
       )}
 
@@ -138,11 +143,11 @@ export function DashboardPage() {
         />
       )}
 
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {researches?.map((research: Research) => (
           <li key={research.id}>
             <Link to={`/researches/${research.id}/overview`} className="group block rounded-xl outline-none">
-              <Card className="transition-all group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-ring">
+              <Card className="h-full justify-between transition-all group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-ring">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="leading-snug">{research.title}</CardTitle>

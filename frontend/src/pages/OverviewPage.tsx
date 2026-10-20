@@ -1,8 +1,9 @@
-import { Navigate, useParams } from 'react-router-dom'
-import { CalendarClock, ListTodo, Target } from 'lucide-react'
+import { Link, Navigate, useParams } from 'react-router-dom'
+import { CalendarClock, ListTodo, NotebookPen, Target, Upload } from 'lucide-react'
 import { useResearch } from '@/services/researches'
 import { ChapterStatusBadge } from '@/components/status-badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -35,13 +36,35 @@ export function OverviewPage() {
     : null
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">{research.title}</h1>
-        <p className="text-sm text-muted-foreground">
-          {research.faculty_field ?? 'Bidang belum diisi'}
-          {research.supervisor_name ? ` · Pembimbing: ${research.supervisor_name}` : ''}
-        </p>
+    <div className="w-full space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">{research.title}</h1>
+          <p className="text-sm text-muted-foreground">
+            {research.faculty_field ?? 'Bidang belum diisi'}
+            {research.supervisor_name ? ` · Pembimbing: ${research.supervisor_name}` : ''}
+          </p>
+        </div>
+        <nav aria-label="Tindakan cepat" className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/researches/${id}/chapters`}>
+              <ListTodo aria-hidden="true" />
+              Kelola bab &amp; tugas
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/researches/${id}/guidance-logs`}>
+              <NotebookPen aria-hidden="true" />
+              Catat bimbingan
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/researches/${id}/documents`}>
+              <Upload aria-hidden="true" />
+              Unggah draf
+            </Link>
+          </Button>
+        </nav>
       </header>
 
       <section aria-label="Metrik progres" className="grid gap-4 sm:grid-cols-3">
@@ -70,7 +93,7 @@ export function OverviewPage() {
           <CardContent className="space-y-1">
             <p className="font-mono text-2xl font-bold">{pending.length}</p>
             {overdue.length > 0 && (
-              <Badge className="border-transparent bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+              <Badge className="border-transparent bg-status-blocked/10 text-status-blocked">
                 {overdue.length} lewat tenggat
               </Badge>
             )}
@@ -93,29 +116,27 @@ export function OverviewPage() {
         </Card>
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Progres per bab</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-4">
-            {chapters.map((chapter) => (
-              <li key={chapter.id} className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="font-medium">{chapter.title}</span>
-                  <span className="flex items-center gap-2">
+      <section aria-label="Progres per bab" className="space-y-3">
+        <h2 className="text-xl font-semibold">Progres per bab</h2>
+        <ul className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          {chapters.map((chapter) => (
+            <li key={chapter.id}>
+              <Card size="sm">
+                <CardContent className="space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-medium">{chapter.title}</span>
                     <ChapterStatusBadge status={chapter.status} />
-                    <span className="w-10 text-right font-mono text-xs text-muted-foreground">
-                      {chapter.progress_percent}%
-                    </span>
-                  </span>
-                </div>
-                <Progress value={chapter.progress_percent} aria-label={`Progres ${chapter.title}`} />
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+                  </div>
+                  <Progress value={chapter.progress_percent} aria-label={`Progres ${chapter.title}`} />
+                  <p className="text-right font-mono text-xs text-muted-foreground">
+                    {chapter.progress_percent}%
+                  </p>
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   )
 }

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { BookOpen } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AuthLayout } from '@/layouts/AuthLayout'
 import { useAuth } from '@/hooks/useAuth'
 import { ApiError } from '@/services/api'
 
@@ -34,12 +34,18 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center text-center">
-          <span className="mx-auto flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen aria-hidden="true" className="size-5" />
-          </span>
+    <AuthLayout
+      footer={
+        <>
+          Belum punya akun?{' '}
+          <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
+            Daftar
+          </Link>
+        </>
+      }
+    >
+      <Card>
+        <CardHeader>
           <CardTitle className="text-xl font-bold">Masuk ke Skripsi Manager</CardTitle>
           <CardDescription>Pantau progres skripsi Anda dari mana saja.</CardDescription>
         </CardHeader>
@@ -76,14 +82,8 @@ export function LoginPage() {
               {busy ? 'Memproses…' : 'Masuk'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Belum punya akun?{' '}
-            <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
-              Daftar
-            </Link>
-          </p>
         </CardContent>
       </Card>
-    </main>
+    </AuthLayout>
   )
 }

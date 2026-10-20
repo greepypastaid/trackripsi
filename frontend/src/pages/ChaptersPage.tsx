@@ -6,7 +6,7 @@ import { useCreateTask, useResearch, useToggleTask, useUpdateChapter } from '@/s
 import { ChapterStatusBadge } from '@/components/status-badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,7 +35,7 @@ export function ChaptersPage() {
   const toggleTask = useToggleTask(id)
   const createTask = useCreateTask(id)
   const updateChapter = useUpdateChapter(id)
-  const [draft, setDraft] = useState<Record<number, string>>({})
+  const [drafts, setDrafts] = useState<Record<number, { title: string; due: string }>>({})
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
@@ -48,109 +48,160 @@ export function ChaptersPage() {
   }
 
   const submitTask = async (chapterId: number) => {
-    const title = draft[chapterId]?.trim()
+    const draft = drafts[chapterId]
+    const title = draft?.title?.trim()
     if (!title) return
     try {
-      await createTask.mutateAsync({ chapterId, title })
-      setDraft((prev) => ({ ...prev, [chapterId]: '' }))
+      await createTask.mutateAsync({ chapterId, title, due_date: draft.due || undefined })
+      setDrafts((prev) => ({ ...prev, [chapterId]: { title: '', due: '' } }))
     } catch {
       toast.error('Gagal menambah tugas.')
     }
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Bab &amp; Tugas</h1>
+    <div className="w-full space-y-5">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">Bab &amp; Tugas</h1>
+        <p className="text-sm text-muted-foreground">
+          Centang tugas yang selesai dan ubah status bab sesuai kemajuan penulisan Anda.
+        </p>
+      </header>
 
-      {research?.chapters?.map((chapter) => (
-        <Card key={chapter.id}>
-          <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
-            <div className="space-y-1">
-              <p className="text-base font-medium leading-none">{chapter.title}</p>
-              <ChapterStatusBadge status={chapter.status} />
-            </div>
-            <Select
-              value={chapter.status}
-              onValueChange={(value) =>
-                updateChapter.mutate(
-                  { chapterId: chapter.id, status: value as ChapterStatus },
-                  { onError: () => toast.error('Gagal mengubah status bab.') },
-                )
-              }
-            >
-              <SelectTrigger className="w-36" aria-label={`Ubah status ${chapter.title}`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Progress value={chapter.progress_percent} aria-label={`Progres ${chapter.title}`} />
-              <span className="w-10 shrink-0 text-right font-mono text-xs text-muted-foreground" aria-live="polite">
-                {chapter.progress_percent}%
-              </span>
-            </div>
+      <ul className="grid items-start gap-5 xl:grid-cols-2">
+        {research?.chapters?.map((chapter) => {
+          const draft = drafts[chapter.id] ?? { title: '', due: '' }
+          return (
+            <li key={chapter.id}>
+              <Card>
+                <CardHeader>
+                  <div className="space-y-1">
+                    <p className="text-base font-medium leading-none">{chapter.title}</p>
+                    <ChapterStatusBadge status={chapter.status} />
+                  </div>
+                  <CardAction>
+                    <Select
+                      value={chapter.status}
+                      onValueChange={(value) =>
+                        updateChapter.mutate(
+                          { chapterId: chapter.id, status: value as ChapterStatus },
+                          { onError: () => toast.error('Gagal mengubah status bab.') },
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-36" aria-label={`Ubah status ${chapter.title}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUSES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardAction>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Progress value={chapter.progress_percent} aria-label={`Progres ${chapter.title}`} />
+                    <span
+                      className="w-10 shrink-0 text-right font-mono text-xs text-muted-foreground"
+                      aria-live="polite"
+                    >
+                      {chapter.progress_percent}%
+                    </span>
+                  </div>
 
-            <ul className="flex flex-col gap-1">
-              {chapter.tasks?.map((task) => (
-                <li key={task.id} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`task-${task.id}`}
-                    checked={task.is_completed}
-                    onCheckedChange={() => toggleTask.mutate(task)}
-                  />
-                  <Label
-                    htmlFor={`task-${task.id}`}
-                    className={
-                      task.is_completed
-                        ? 'font-normal text-muted-foreground line-through'
-                        : 'font-normal text-foreground'
-                    }
+                  <ul className="flex flex-col gap-1">
+                    {chapter.tasks?.map((task) => (
+                      <li key={task.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`task-${task.id}`}
+                          checked={task.is_completed}
+                          onCheckedChange={() => toggleTask.mutate(task)}
+                        />
+                        <Label
+                          htmlFor={`task-${task.id}`}
+                          className={
+                            task.is_completed
+                              ? 'font-normal text-muted-foreground line-through'
+                              : 'font-normal text-foreground'
+                          }
+                        >
+                          {task.title}
+                        </Label>
+                        {task.due_date && (
+                          <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">
+                            {task.due_date}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                    {chapter.tasks?.length === 0 && (
+                      <li className="text-sm text-muted-foreground">Belum ada tugas.</li>
+                    )}
+                  </ul>
+
+                  <form
+                    className="flex items-end gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      void submitTask(chapter.id)
+                    }}
                   >
-                    {task.title}
-                  </Label>
-                  {task.due_date && (
-                    <span className="ml-auto font-mono text-xs text-muted-foreground">{task.due_date}</span>
-                  )}
-                </li>
-              ))}
-              {chapter.tasks?.length === 0 && <li className="text-sm text-muted-foreground">Belum ada tugas.</li>}
-            </ul>
-
-            <form
-              className="flex items-end gap-2"
-              onSubmit={(e) => {
-                e.preventDefault()
-                void submitTask(chapter.id)
-              }}
-            >
-              <div className="flex flex-1 flex-col gap-1.5">
-                <Label htmlFor={`new-task-${chapter.id}`} className="sr-only">
-                  Tugas baru untuk {chapter.title}
-                </Label>
-                <Input
-                  id={`new-task-${chapter.id}`}
-                  value={draft[chapter.id] ?? ''}
-                  onChange={(e) => setDraft((prev) => ({ ...prev, [chapter.id]: e.target.value }))}
-                  maxLength={255}
-                  placeholder="Contoh: Revisi rumusan masalah"
-                />
-              </div>
-              <Button type="submit" variant="outline" disabled={createTask.isPending}>
-                <Plus data-icon="inline-start" aria-hidden="true" />
-                Tambah
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      ))}
+                    <div className="flex flex-1 flex-col gap-1.5">
+                      <Label htmlFor={`new-task-${chapter.id}`} className="sr-only">
+                        Tugas baru untuk {chapter.title}
+                      </Label>
+                      <Input
+                        id={`new-task-${chapter.id}`}
+                        value={draft.title}
+                        onChange={(e) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [chapter.id]: {
+                              title: e.target.value,
+                              due: prev[chapter.id]?.due ?? '',
+                            },
+                          }))
+                        }
+                        maxLength={255}
+                        placeholder="Contoh: Revisi rumusan masalah"
+                      />
+                    </div>
+                    <div className="flex shrink-0 flex-col gap-1.5">
+                      <Label htmlFor={`new-task-due-${chapter.id}`} className="sr-only">
+                        Tenggat (opsional)
+                      </Label>
+                      <Input
+                        id={`new-task-due-${chapter.id}`}
+                        type="date"
+                        aria-label={`Tenggat tugas ${chapter.title}`}
+                        className="w-40"
+                        value={draft.due}
+                        onChange={(e) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [chapter.id]: {
+                              title: prev[chapter.id]?.title ?? '',
+                              due: e.target.value,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+                    <Button type="submit" variant="outline" disabled={createTask.isPending}>
+                      <Plus data-icon="inline-start" aria-hidden="true" />
+                      Tambah
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }
