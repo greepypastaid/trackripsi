@@ -82,7 +82,7 @@ export function useCreateLog(researchId: number) {
   return useMutation({
     mutationFn: (body: {
       meeting_date: string
-      chapter_id: number | null
+      chapter_ids: number[]
       feedback_notes: string
       action_items: string[]
     }) => api<Response<SupervisionLog>>(`/researches/${researchId}/logs`, { method: 'POST', body }),

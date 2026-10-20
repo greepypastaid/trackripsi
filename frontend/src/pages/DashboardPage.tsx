@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BookOpen, Plus } from 'lucide-react'
+import { BookOpen, CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateResearch, useResearches } from '@/services/researches'
+import { useAppointments } from '@/services/literature'
 import { ResearchStatusBadge } from '@/components/status-badge'
 import { EmptyState } from '@/components/empty-state'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -39,6 +40,10 @@ export function DashboardPage() {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({ title: '', field: '', target: '' })
+
+  // Jadwal mendatang lintas riset: satu query per riset (maks 5 teratas).
+  const activeId = researches?.[0]?.id
+  const { data: appointmentData } = useAppointments(activeId ?? Number.NaN)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,6 +130,29 @@ export function DashboardPage() {
           </DialogContent>
         </Dialog>
       </header>
+
+      {appointmentData?.meta.next && researches?.[0] && (
+        <Alert>
+          <CalendarClock aria-hidden="true" />
+          <AlertDescription className="flex flex-wrap items-center gap-x-2">
+            <span className="font-medium">Bimbingan berikutnya:</span>
+            <span>
+              {new Date(appointmentData.meta.next.scheduled_at).toLocaleString('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+            <Button asChild variant="link" size="sm" className="px-0">
+              <Link to={`/researches/${researches[0].id}/appointments`}>
+                {researches[0].title}
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

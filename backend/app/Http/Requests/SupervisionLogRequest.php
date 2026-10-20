@@ -17,7 +17,8 @@ class SupervisionLogRequest extends FormRequest
 
         return [
             'meeting_date' => [$required, 'date'],
-            'chapter_id' => ['nullable', 'integer', 'exists:chapters,id'],
+            'chapter_ids' => ['nullable', 'array'],
+            'chapter_ids.*' => ['integer', 'exists:chapters,id'],
             'feedback_notes' => [$required, 'string', 'max:20000'],
             'action_items' => ['nullable', 'array'],
             'action_items.*' => ['string', 'max:255'],

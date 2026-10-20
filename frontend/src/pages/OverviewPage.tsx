@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { CalendarClock, ListTodo, NotebookPen, Target, Upload } from 'lucide-react'
+import { CalendarClock, ListTodo, NotebookPen, ShieldCheck, Target, Upload } from 'lucide-react'
 import { useResearch } from '@/services/researches'
+import { useReadiness } from '@/services/literature'
 import { ChapterStatusBadge } from '@/components/status-badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -13,6 +14,7 @@ export function OverviewPage() {
   const { researchId } = useParams()
   const id = Number(researchId)
   const { data: research, isLoading, error } = useResearch(id)
+  const { data: readiness } = useReadiness(id)
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
@@ -115,6 +117,50 @@ export function OverviewPage() {
           </CardContent>
         </Card>
       </section>
+
+      {readiness && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-base">
+              <span className="flex items-center gap-2">
+                <ShieldCheck aria-hidden="true" className="size-4 text-primary" />
+                Kesiapan sidang: {readiness.score}%
+              </span>
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/researches/${id}/readiness`}>Lihat rincian</Link>
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Progress value={readiness.score} aria-label="Skor kesiapan sidang" />
+            {readiness.blockers.length > 0 ? (
+              <ul className="text-sm text-muted-foreground">
+                {readiness.blockers.slice(0, 3).map((blocker) => (
+                  <li key={blocker.key} className="flex gap-2">
+                    <span aria-hidden="true">•</span>
+                    <span>
+                      <span className="font-medium text-foreground">{blocker.label}</span>:{' '}
+                      {blocker.detail}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-status-done">Semua syarat terpenuhi.</p>
+            )}
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Badge variant="outline">{readiness.stats.literature_included} sumber termasuk</Badge>
+              <Badge variant="outline">
+                {readiness.stats.supervision_logs}/{readiness.stats.min_supervision_sessions} sesi
+              </Badge>
+              <Badge variant="outline">{readiness.stats.upcoming_appointments} jadwal mendatang</Badge>
+            </div>
+            <Button asChild variant="ghost" size="sm">
+              <Link to={`/researches/${id}/logbook/print`}>Cetak logbook bimbingan</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <section aria-label="Progres per bab" className="space-y-3">
         <h2 className="text-xl font-semibold">Progres per bab</h2>

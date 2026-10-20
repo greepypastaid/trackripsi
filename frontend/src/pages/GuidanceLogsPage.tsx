@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { CalendarIcon, ListChecks } from 'lucide-react'
+import { CalendarIcon, ChevronsUpDown, CircleAlert, CircleCheck, ListChecks } from 'lucide-react'
 import { toast } from 'sonner'
 import { useConvertActionItems, useCreateLog, useResearch } from '@/services/researches'
 import { EmptyState } from '@/components/empty-state'
@@ -8,16 +8,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -40,7 +34,7 @@ export function GuidanceLogsPage() {
 
   const [meetingDate, setMeetingDate] = useState(TODAY_ISO)
   const [dateOpen, setDateOpen] = useState(false)
-  const [chapterId, setChapterId] = useState('none')
+  const [chapterIds, setChapterIds] = useState<number[]>([])
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState('')
 
@@ -59,7 +53,7 @@ export function GuidanceLogsPage() {
     try {
       await createLog.mutateAsync({
         meeting_date: meetingDate,
-        chapter_id: chapterId === 'none' ? null : Number(chapterId),
+        chapter_ids: chapterIds,
         feedback_notes: notes,
         action_items: items.split('\n').map((s) => s.trim()).filter(Boolean),
       })
@@ -129,20 +123,46 @@ export function GuidanceLogsPage() {
                 </Popover>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="log_chapter">Bab terkait (opsional)</Label>
-                <Select value={chapterId} onValueChange={setChapterId}>
-                  <SelectTrigger id="log_chapter" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Tidak terkait bab</SelectItem>
-                    {research?.chapters?.map((c) => (
-                      <SelectItem key={c.id} value={String(c.id)}>
-                        {c.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Bab terkait (opsional, bisa pilih beberapa)</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button type="button" variant="outline" className="w-full justify-between font-normal">
+                      <span className="truncate">
+                        {chapterIds.length === 0
+                          ? 'Tidak terkait bab'
+                          : research?.chapters
+                              ?.filter((c) => chapterIds.includes(c.id))
+                              .map((c) => c.title.replace(/^Bab \d+:\s*/, ''))
+                              .join(', ')}
+                      </span>
+                      <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-1" align="start">
+                    <div className="max-h-56 overflow-y-auto">
+                      {research?.chapters?.map((c) => {
+                        const checked = chapterIds.includes(c.id)
+                        return (
+                          <label
+                            key={c.id}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() =>
+                                setChapterIds((prev) =>
+                                  checked ? prev.filter((id) => id !== c.id) : [...prev, c.id],
+                                )
+                              }
+                              aria-label={c.title}
+                            />
+                            {c.title}
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="feedback">Catatan masukan</Label>
@@ -187,61 +207,68 @@ export function GuidanceLogsPage() {
               description="Catat hasil setiap sesi bimbingan agar poin revisi tidak terlupakan."
             />
           )}
-          <ol className="grid items-start gap-3 xl:grid-cols-2">
-            {logs.map((log) => (
-              <li key={log.id}>
-                <Card size="sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Badge variant="secondary" className="font-mono">
-                        {log.meeting_date}
+          <ol className="relative flex flex-col gap-0 border-l pl-5">
+            {logs.map((log) => {
+              const open = log.action_items?.filter((item) => !item.is_resolved) ?? []
+              const done = log.action_items?.filter((item) => item.is_resolved) ?? []
+              return (
+                <li key={log.id} className="relative pb-6 last:pb-0">
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-1.5 -left-[calc(1.25rem+3px)] size-2.5 rounded-full border-2 border-background bg-primary"
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <time
+                      dateTime={log.meeting_date}
+                      className="font-mono text-xs font-medium text-muted-foreground"
+                    >
+                      {dateFmt.format(new Date(`${log.meeting_date}T00:00:00`))}
+                    </time>
+                    {log.chapters?.map((title) => (
+                      <Badge key={title} variant="outline" className="text-[11px]">
+                        {title}
                       </Badge>
-                    </CardTitle>
-                    <CardAction>
-                      {log.chapter_id && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            convert.mutate(log.id, {
-                              onSuccess: () => toast.success('Poin revisi dikonversi ke checklist bab.'),
-                              onError: () => toast.error('Gagal mengonversi poin revisi.'),
-                            })
-                          }
-                          disabled={convert.isPending}
-                        >
-                          Jadikan checklist
-                        </Button>
-                      )}
-                    </CardAction>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p className="text-sm text-foreground">{log.feedback_notes}</p>
-                    {log.action_items && log.action_items.length > 0 && (
-                      <ul className="flex flex-col gap-1">
-                        {log.action_items.map((item) => (
-                          <li key={item.id}>
-                            {item.is_resolved ? (
-                              <span className="text-sm text-muted-foreground line-through">
-                                {item.description}
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-2 text-sm text-status-revision">
-                                <span
-                                  aria-hidden="true"
-                                  className="size-1.5 rounded-full bg-status-revision"
-                                />
-                                {item.description}
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                    ))}
+                    {(log.chapter_ids?.length ?? 0) > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="ml-auto"
+                        onClick={() =>
+                          convert.mutate(log.id, {
+                            onSuccess: () => toast.success('Poin revisi dikonversi ke checklist bab.'),
+                            onError: () => toast.error('Gagal mengonversi poin revisi.'),
+                          })
+                        }
+                        disabled={convert.isPending}
+                      >
+                        <ListChecks aria-hidden="true" />
+                        Jadikan checklist
+                      </Button>
                     )}
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
+                  </div>
+
+                  <p className="mt-1.5 text-sm">{log.feedback_notes}</p>
+
+                  {(open.length > 0 || done.length > 0) && (
+                    <ul className="mt-2 flex flex-col gap-1">
+                      {open.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2 text-sm text-status-revision">
+                          <CircleAlert aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+                          {item.description}
+                        </li>
+                      ))}
+                      {done.map((item) => (
+                        <li key={item.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <CircleCheck aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-status-done" />
+                          <span className="line-through">{item.description}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
+            })}
           </ol>
         </section>
       </div>

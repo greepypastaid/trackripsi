@@ -12,7 +12,8 @@ class SupervisionLogResource extends JsonResource
         return [
             'id' => $this->id,
             'research_id' => $this->research_id,
-            'chapter_id' => $this->chapter_id,
+            'chapter_ids' => $this->whenLoaded('chapters', fn () => $this->chapters->pluck('id')),
+            'chapters' => $this->whenLoaded('chapters', fn () => $this->chapters->pluck('title')),
             'meeting_date' => $this->meeting_date?->toDateString(),
             'feedback_notes' => $this->feedback_notes,
             'action_items' => ActionItemResource::collection($this->whenLoaded('actionItems')),

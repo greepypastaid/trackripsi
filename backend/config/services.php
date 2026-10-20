@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'openalex' => [
+        // Email polite-pool OpenAlex. Tidak wajib, tapi mempercepat respons.
+        'mailto' => env('OPENALEX_MAILTO'),
+    ],
+
 ];

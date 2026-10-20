@@ -1,5 +1,17 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { BookOpen, FileText, LayoutDashboard, ListChecks, LogOut, NotebookPen } from 'lucide-react'
+import {
+  BookOpen,
+  CalendarClock,
+  FileText,
+  GraduationCap,
+  Library,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  NotebookPen,
+  Plus,
+  ShieldCheck,
+} from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useResearch, useResearches } from '@/services/researches'
@@ -40,12 +52,33 @@ import {
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ThemeToggle } from '@/components/theme-toggle'
 
-const NAV = [
-  { to: 'overview', label: 'Ringkasan', Icon: LayoutDashboard },
-  { to: 'chapters', label: 'Bab & Tugas', Icon: ListChecks },
-  { to: 'guidance-logs', label: 'Log Bimbingan', Icon: NotebookPen },
-  { to: 'documents', label: 'Berkas Draf', Icon: FileText },
+const NAV_GROUPS = [
+  {
+    label: 'Penulisan',
+    items: [
+      { to: 'overview', label: 'Ringkasan', Icon: LayoutDashboard },
+      { to: 'chapters', label: 'Bab & Tugas', Icon: ListChecks },
+      { to: 'documents', label: 'Berkas Draf', Icon: FileText },
+    ],
+  },
+  {
+    label: 'Riset & Bimbingan',
+    items: [
+      { to: 'literature', label: 'Literatur', Icon: Library },
+      { to: 'guidance-logs', label: 'Log Bimbingan', Icon: NotebookPen },
+      { to: 'appointments', label: 'Jadwal', Icon: CalendarClock },
+    ],
+  },
+  {
+    label: 'Sidang',
+    items: [
+      { to: 'readiness', label: 'Kesiapan', Icon: ShieldCheck },
+      { to: 'defense', label: 'Pertanyaan', Icon: GraduationCap },
+    ],
+  },
 ]
+
+const NAV = NAV_GROUPS.flatMap((group) => group.items)
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -115,23 +148,60 @@ export function AppLayout() {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Menu riset</SidebarGroupLabel>
+            <SidebarGroupLabel>Semua Menu</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {NAV.map(({ to, label, Icon }) => {
-                  const target = Number.isFinite(id) ? `/researches/${id}/${to}` : '/dashboard'
-                  return (
-                    <SidebarMenuItem key={to}>
-                      <SidebarMenuButton asChild isActive={location.pathname.endsWith(to)} tooltip={label}>
-                        <NavLink to={target}>
-                          <Icon aria-hidden="true" />
-                          {label}
+              {researches.length === 0 ? (
+                /* Belum ada riset sama sekali: satu pintu ke dashboard untuk membuat riset. */
+                <div className="flex flex-col gap-3 px-2 py-1">
+                  <p className="text-xs text-muted-foreground">
+                    Belum ada proyek riset. Buat riset pertama untuk membuka bab, tugas, log
+                    bimbingan, dan matriks literatur.
+                  </p>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={location.pathname === '/dashboard'} tooltip="Buat riset">
+                        <NavLink to="/dashboard">
+                          <Plus aria-hidden="true" />
+                          Buat riset pertama
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
+                  </SidebarMenu>
+                </div>
+              ) : !Number.isFinite(id) ? (
+                /* Riset ada tapi belum dipilih (berada di dashboard). */
+                <p className="px-2 py-1 text-xs text-muted-foreground">
+                  Pilih riset di atas untuk membuka menu bab, tugas, bimbingan, literatur, dan
+                  kesiapan sidang.
+                </p>
+              ) : (
+                /* Riset aktif: menu per kelompok. */
+                <div className="flex flex-col gap-1">
+                  {NAV_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <p className="px-2 pt-2 pb-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                        {group.label}
+                      </p>
+                      <SidebarMenu>
+                        {group.items.map(({ to, label, Icon }) => (
+                          <SidebarMenuItem key={to}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={location.pathname.endsWith(to)}
+                              tooltip={label}
+                            >
+                              <NavLink to={`/researches/${id}/${to}`}>
+                                <Icon aria-hidden="true" />
+                                {label}
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </div>
+                  ))}
+                </div>
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
 

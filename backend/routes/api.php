@@ -1,10 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChapterController;
+use App\Http\Controllers\Api\CitationController;
+use App\Http\Controllers\Api\DefenseQuestionController;
 use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\LiteratureController;
+use App\Http\Controllers\Api\LogbookController;
+use App\Http\Controllers\Api\ReadinessController;
 use App\Http\Controllers\Api\ResearchController;
 use App\Http\Controllers\Api\SupervisionLogController;
+use App\Http\Controllers\Api\SynthesisFieldController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -47,4 +54,40 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/documents/{draft}/download', [FileController::class, 'download'])->name('documents.download');
     Route::delete('/documents/{draft}', [FileController::class, 'destroy']);
+
+    // F1/F2 — Matriks literatur, kolom sintesis, sitasi.
+    Route::get('/researches/{research}/literature', [LiteratureController::class, 'index']);
+    Route::post('/researches/{research}/literature', [LiteratureController::class, 'store']);
+    Route::post('/researches/{research}/literature/import-doi', [LiteratureController::class, 'importDoi'])
+        ->middleware('throttle:20,1');
+    Route::get('/researches/{research}/literature/bibliography', [CitationController::class, 'bibliography']);
+    Route::get('/researches/{research}/literature/export', [CitationController::class, 'bibtex']);
+    Route::get('/researches/{research}/literature/{entry}/citation', [CitationController::class, 'citation']);
+    Route::patch('/literature/{entry}', [LiteratureController::class, 'update']);
+    Route::delete('/literature/{entry}', [LiteratureController::class, 'destroy']);
+    Route::put('/literature/{entry}/values', [LiteratureController::class, 'storeValues']);
+
+    Route::get('/researches/{research}/synthesis-fields', [SynthesisFieldController::class, 'index']);
+    Route::post('/researches/{research}/synthesis-fields', [SynthesisFieldController::class, 'store']);
+    Route::patch('/synthesis-fields/{field}', [SynthesisFieldController::class, 'update']);
+    Route::delete('/synthesis-fields/{field}', [SynthesisFieldController::class, 'destroy']);
+
+    // F3 — Jadwal bimbingan.
+    Route::get('/researches/{research}/appointments', [AppointmentController::class, 'index']);
+    Route::post('/researches/{research}/appointments', [AppointmentController::class, 'store']);
+    Route::get('/researches/{research}/appointments/suggested-agenda', [AppointmentController::class, 'suggestedAgenda']);
+    Route::post('/researches/{research}/appointments/{appointment}/complete', [AppointmentController::class, 'complete']);
+    Route::patch('/appointments/{appointment}', [AppointmentController::class, 'update']);
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy']);
+
+    // F4 — Kesiapan sidang.
+    Route::get('/researches/{research}/readiness', [ReadinessController::class, 'show']);
+    Route::put('/researches/{research}/readiness/checklist', [ReadinessController::class, 'updateChecklist']);
+
+    // F5 — Lembar logbook untuk dicetak.
+    Route::get('/researches/{research}/logbook', [LogbookController::class, 'show']);
+
+    // F6 — Bank pertanyaan sidang.
+    Route::get('/researches/{research}/defense-questions', [DefenseQuestionController::class, 'index']);
+    Route::put('/researches/{research}/defense-questions/{question}/answer', [DefenseQuestionController::class, 'saveAnswer']);
 });

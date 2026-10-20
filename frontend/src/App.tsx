@@ -10,6 +10,11 @@ import { OverviewPage } from './pages/OverviewPage'
 import { ChaptersPage } from './pages/ChaptersPage'
 import { GuidanceLogsPage } from './pages/GuidanceLogsPage'
 import { DocumentsPage } from './pages/DocumentsPage'
+import { LiteraturePage } from './pages/LiteraturePage'
+import { AppointmentsPage } from './pages/AppointmentsPage'
+import { ReadinessPage } from './pages/ReadinessPage'
+import { DefensePage } from './pages/DefensePage'
+import { LogbookPrintPage } from './pages/LogbookPrintPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const queryClient = new QueryClient({
@@ -54,7 +59,20 @@ export default function App() {
               <Route path="chapters" element={<ChaptersPage />} />
               <Route path="guidance-logs" element={<GuidanceLogsPage />} />
               <Route path="documents" element={<DocumentsPage />} />
+              <Route path="literature" element={<LiteraturePage />} />
+              <Route path="appointments" element={<AppointmentsPage />} />
+              <Route path="readiness" element={<ReadinessPage />} />
+              <Route path="defense" element={<DefensePage />} />
             </Route>
+            {/* Cetak logbook: tanpa sidebar agar hasil print bersih. */}
+            <Route
+              path="/researches/:researchId/logbook/print"
+              element={
+                <Protected>
+                  <LogbookPrintPage />
+                </Protected>
+              }
+            />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
           <Toaster position="top-right" richColors closeButton />

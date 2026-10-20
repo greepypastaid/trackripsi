@@ -21,4 +21,9 @@ class ActionItem extends Model
     {
         return $this->belongsTo(SupervisionLog::class);
     }
+
+    public function log(): BelongsTo
+    {
+        return $this->supervisionLog();
+    }
 }

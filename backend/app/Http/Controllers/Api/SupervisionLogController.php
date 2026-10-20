@@ -29,14 +29,14 @@ class SupervisionLogController extends Controller
         $research = $request->user()->researches()->findOrFail($researchId);
         $validated = $request->validated();
 
-        $this->assertChapterOwned($research->id, $validated['chapter_id'] ?? null);
+        $chapterIds = $this->assertChaptersOwned($research->id, $validated['chapter_ids'] ?? []);
 
-        $log = DB::transaction(function () use ($research, $validated) {
+        $log = DB::transaction(function () use ($research, $validated, $chapterIds) {
             $log = $research->supervisionLogs()->create([
-                'chapter_id' => $validated['chapter_id'] ?? null,
                 'meeting_date' => $validated['meeting_date'],
                 'feedback_notes' => $validated['feedback_notes'],
             ]);
+            $log->chapters()->sync($chapterIds);
 
             foreach ($validated['action_items'] ?? [] as $description) {
                 $log->actionItems()->create(['description' => $description]);
@@ -46,7 +46,7 @@ class SupervisionLogController extends Controller
         });
 
         return response()->json(
-            ['data' => new SupervisionLogResource($log->load('actionItems'))],
+            ['data' => new SupervisionLogResource($log->load(['actionItems', 'chapters']))],
             201
         );
     }
@@ -55,11 +55,14 @@ class SupervisionLogController extends Controller
     {
         $this->authorizeLog($request, $log);
         $validated = $request->validated();
-        $this->assertChapterOwned($log->research_id, $validated['chapter_id'] ?? null);
+        $chapterIds = $this->assertChaptersOwned($log->research_id, $validated['chapter_ids'] ?? []);
 
-        $log->update(collect($validated)->except('action_items')->all());
+        $log->update(collect($validated)->except(['action_items', 'chapter_ids'])->all());
+        $log->chapters()->sync($chapterIds);
 
-        return response()->json(['data' => new SupervisionLogResource($log->load('actionItems'))]);
+        return response()->json(
+            ['data' => new SupervisionLogResource($log->load(['actionItems', 'chapters']))]
+        );
     }
 
     public function destroy(Request $request, SupervisionLog $log): JsonResponse
@@ -72,15 +75,16 @@ class SupervisionLogController extends Controller
     }
 
     /**
-     * Convert log action items into checklist tasks of the linked chapter (FR-05).
+     * Convert log action items into checklist tasks (FR-05).
+     * ponytail: tugas dibuat di bab pertama yang terkait; upgrade = pilih bab per poin revisi.
      */
     public function convertActionItems(Request $request, SupervisionLog $log): JsonResponse
     {
         $this->authorizeLog($request, $log);
 
-        abort_if($log->chapter_id === null, 422, 'Log ini tidak terhubung ke bab.');
+        $chapter = $log->chapters()->first();
+        abort_if($chapter === null, 422, 'Log ini tidak terhubung ke bab.');
 
-        $chapter = Chapter::findOrFail($log->chapter_id);
         $created = DB::transaction(function () use ($log, $chapter) {
             foreach ($log->actionItems()->where('is_resolved', false)->get() as $item) {
                 $chapter->tasks()->create(['title' => $item->description]);
@@ -93,17 +97,20 @@ class SupervisionLogController extends Controller
         return response()->json(['message' => 'Poin revisi dikonversi ke checklist.', 'task_count' => $created]);
     }
 
-    private function assertChapterOwned(int $researchId, ?int $chapterId): void
+    /** Semua bab wajib milik riset ini; kembalikan id yang sudah tervalidasi. */
+    private function assertChaptersOwned(int $researchId, array $chapterIds): array
     {
-        if ($chapterId === null) {
-            return;
-        }
+        $ids = array_values(array_unique(array_map('intval', $chapterIds)));
 
-        abort_unless(
-            Chapter::where('id', $chapterId)->where('research_id', $researchId)->exists(),
+        $owned = Chapter::where('research_id', $researchId)->whereIn('id', $ids)->pluck('id');
+
+        abort_if(
+            $owned->count() !== count($ids),
             422,
             'Bab tidak termasuk dalam riset ini.'
         );
+
+        return $ids;
     }
 
     private function authorizeLog(Request $request, SupervisionLog $log): void

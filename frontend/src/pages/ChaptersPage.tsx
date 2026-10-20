@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCreateTask, useResearch, useToggleTask, useUpdateChapter } from '@/services/researches'
 import { ChapterStatusBadge } from '@/components/status-badge'
@@ -75,9 +75,22 @@ export function ChaptersPage() {
             <li key={chapter.id}>
               <Card>
                 <CardHeader>
-                  <div className="space-y-1">
-                    <p className="text-base font-medium leading-none">{chapter.title}</p>
-                    <ChapterStatusBadge status={chapter.status} />
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted font-mono text-xs font-medium text-muted-foreground">
+                        {chapter.order}
+                      </span>
+                      <p className="text-base font-medium leading-none">{chapter.title}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ChapterStatusBadge status={chapter.status} />
+                      {(chapter.tasks?.length ?? 0) > 0 && chapter.tasks && (
+                        <span className="text-xs text-muted-foreground">
+                          {chapter.tasks.filter((t) => t.is_completed).length}/
+                          {chapter.tasks.length} tugas
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <CardAction>
                     <Select
@@ -114,30 +127,41 @@ export function ChaptersPage() {
                   </div>
 
                   <ul className="flex flex-col gap-1">
-                    {chapter.tasks?.map((task) => (
-                      <li key={task.id} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`task-${task.id}`}
-                          checked={task.is_completed}
-                          onCheckedChange={() => toggleTask.mutate(task)}
-                        />
-                        <Label
-                          htmlFor={`task-${task.id}`}
-                          className={
-                            task.is_completed
-                              ? 'font-normal text-muted-foreground line-through'
-                              : 'font-normal text-foreground'
-                          }
-                        >
-                          {task.title}
-                        </Label>
-                        {task.due_date && (
-                          <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">
-                            {task.due_date}
-                          </span>
-                        )}
-                      </li>
-                    ))}
+                    {chapter.tasks?.map((task) => {
+                      const overdue =
+                        !task.is_completed &&
+                        task.due_date !== null &&
+                        new Date(`${task.due_date}T23:59:59`) < new Date()
+                      return (
+                        <li key={task.id} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`task-${task.id}`}
+                            checked={task.is_completed}
+                            onCheckedChange={() => toggleTask.mutate(task)}
+                          />
+                          <Label
+                            htmlFor={`task-${task.id}`}
+                            className={
+                              task.is_completed
+                                ? 'font-normal text-muted-foreground line-through'
+                                : 'font-normal text-foreground'
+                            }
+                          >
+                            {task.title}
+                          </Label>
+                          {task.due_date && (
+                            <span
+                              className={`ml-auto flex shrink-0 items-center gap-1 font-mono text-[11px] ${
+                                overdue ? 'text-status-revision' : 'text-muted-foreground'
+                              }`}
+                            >
+                              <CalendarClock aria-hidden="true" className="size-3" />
+                              {task.due_date}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
                     {chapter.tasks?.length === 0 && (
                       <li className="text-sm text-muted-foreground">Belum ada tugas.</li>
                     )}
