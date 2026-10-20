@@ -58,7 +58,15 @@ class ReadinessController extends Controller
             ->where('is_resolved', false)
             ->count();
 
-        if ($openActionItems > 0) {
+        // Cek ini hanya bisa dianggap terpenuhi jika sudah ada sesi bimbingan
+        // yang mendokumentasikan bahwa tidak ada poin revisi tersisa.
+        if ($logCount === 0) {
+            $blockers[] = [
+                'key' => 'action_items',
+                'label' => 'Poin revisi diverifikasi lewat bimbingan',
+                'detail' => 'Belum ada sesi bimbingan tercatat, jadi belum bisa dipastikan bebas poin revisi.',
+            ];
+        } elseif ($openActionItems > 0) {
             $blockers[] = [
                 'key' => 'action_items',
                 'label' => 'Tidak ada poin revisi terbuka',
@@ -87,7 +95,17 @@ class ReadinessController extends Controller
             }
         }
 
-        if ($research->target_completion_date && $research->target_completion_date->isPast()) {
+        $targetDate = $research->target_completion_date;
+
+        // Belum mengatur target juga berarti prasyarat waktu belum terpenuhi,
+        // jangan biarkan cek ini lolos secara kosong dan menggelembungkan skor.
+        if (! $targetDate) {
+            $blockers[] = [
+                'key' => 'deadline',
+                'label' => 'Target waktu',
+                'detail' => 'Belum mengatur tanggal target selesai riset.',
+            ];
+        } elseif ($targetDate->isPast()) {
             $blockers[] = [
                 'key' => 'deadline',
                 'label' => 'Target waktu',

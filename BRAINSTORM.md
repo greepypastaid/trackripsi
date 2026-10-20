@@ -1,4 +1,4 @@
-# Brainstorm — Skripsi Manager
+# Brainstorm — Trackripsi.app
 
 ## Directions
 

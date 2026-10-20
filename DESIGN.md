@@ -1,4 +1,4 @@
-# Design Specification — Skripsi Manager
+# Design Specification — Trackripsi.app
 
 ## 1. Information architecture
 

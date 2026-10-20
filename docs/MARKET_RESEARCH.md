@@ -1,4 +1,4 @@
-# Market Research — Skripsi Manager
+# Market Research — Trackripsi.app
 
 > Data mode: **estimate**. Figures without a source are
 > internal estimates, not verified data. All monetary figures are IDR (Rupiah).

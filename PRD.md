@@ -1,8 +1,8 @@
-# Product Requirements Document — Skripsi Manager
+# Product Requirements Document — Trackripsi.app
 
 ## 1. Executive summary
 
-Skripsi Manager adalah aplikasi web *self-management* skripsi untuk mahasiswa tingkat akhir. Sistem memfasilitasi pelacakan alur penyusunan tugas akhir secara mandiri tanpa birokrasi kampus. Sistem tidak melibatkan akses dosen, penguji, atau staf akademik. Fokus utama aplikasi: pelacakan bab/milestone, pencatatan log bimbingan pribadi, pengorganisasian berkas draf, dan pemantauan target waktu penyelesaian. Sistem mendukung satu pengguna mengelola banyak riset sekaligus (*multi-research*).
+Trackripsi.app adalah aplikasi web *self-management* skripsi untuk mahasiswa tingkat akhir. Sistem memfasilitasi pelacakan alur penyusunan tugas akhir secara mandiri tanpa birokrasi kampus. Sistem tidak melibatkan akses dosen, penguji, atau staf akademik. Fokus utama aplikasi: pelacakan bab/milestone, pencatatan log bimbingan pribadi, pengorganisasian berkas draf, dan pemantauan target waktu penyelesaian. Sistem mendukung satu pengguna mengelola banyak riset sekaligus (*multi-research*).
 
 ## 2. Goals & success metrics
 

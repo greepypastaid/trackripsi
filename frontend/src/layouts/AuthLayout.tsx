@@ -4,7 +4,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 
 const HIGHLIGHTS = [
   'Template Bab 1–5 otomatis untuk setiap riset baru',
-  'Checklist tugas dan log bimbingan dalam satu tempat',
+  'Checklist tugas dan log bimbingan per riset',
   'Riwayat versi berkas draf per bab',
 ]
 
@@ -34,16 +34,16 @@ export function AuthLayout({
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground text-primary">
             <BookOpen aria-hidden="true" className="size-5" />
           </span>
-          Skripsi Manager
+          Trackripsi.app
         </div>
 
         <div className="relative max-w-md space-y-5">
           <h1 className="text-3xl leading-tight font-bold tracking-tight">
-            Selesaikan skripsi, satu bab dalam satu waktu.
+            Selesaikan skripsi bab demi bab.
           </h1>
           <p className="text-sm leading-relaxed text-primary-foreground/80">
-            Kelola seluruh perjalanan tugas akhir Anda — mulai dari bab, tugas, bimbingan, hingga
-            berkas draf — di satu tempat.
+            Bab, tugas, log bimbingan, dan berkas draf riset Anda semuanya
+            tertib di satu aplikasi.
           </p>
           <ul className="space-y-2.5 text-sm">
             {HIGHLIGHTS.map((item) => (
@@ -61,7 +61,7 @@ export function AuthLayout({
         </div>
 
         <p className="relative text-xs text-primary-foreground/60">
-          © {YEAR} Skripsi Manager
+          © {YEAR} Trackripsi.app
         </p>
       </section>
 

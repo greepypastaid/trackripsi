@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Petunjuk teknis untuk AI coding agent yang bekerja pada repositori Skripsi Manager.
+Petunjuk teknis untuk AI coding agent yang bekerja pada repositori Trackripsi.app.
 
 ## Project overview
 
-Skripsi Manager adalah platform pelacak dan pengelola progres tugas akhir/skripsi mandiri untuk mahasiswa tingkat akhir. 
+Trackripsi.app adalah platform pelacak dan pengelola progres tugas akhir/skripsi mandiri untuk mahasiswa tingkat akhir. 
 
 Karakteristik sistem:
 - **Aktor tunggal**: Khusus mahasiswa (tanpa peran dosen pembimbing, penguji, atau admin prodi).
@@ -78,7 +78,7 @@ Jalankan pengembangan secara sekuensial:
 ### Struktur Direktori
 
 ```
-skripsi-manager/
+trackripsi.app/
 ├── backend/
 │   ├── app/
 │   │   ├── Http/

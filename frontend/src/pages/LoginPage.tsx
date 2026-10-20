@@ -46,7 +46,7 @@ export function LoginPage() {
     >
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Masuk ke Skripsi Manager</CardTitle>
+          <CardTitle className="text-xl font-bold">Masuk ke Trackripsi.app</CardTitle>
           <CardDescription>Pantau progres skripsi Anda dari mana saja.</CardDescription>
         </CardHeader>
         <CardContent>

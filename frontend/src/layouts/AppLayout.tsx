@@ -116,7 +116,7 @@ export function AppLayout() {
                     <BookOpen aria-hidden="true" className="size-4" />
                   </span>
                   <span className="grid flex-1 text-left leading-tight">
-                    <span className="truncate font-semibold">Skripsi Manager</span>
+                    <span className="truncate font-semibold">Trackripsi.app</span>
                     <span className="truncate text-xs text-muted-foreground">Pelacak progres TGA</span>
                   </span>
                 </Link>
@@ -259,7 +259,7 @@ export function AppLayout() {
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger aria-label="Buka/tutup sidebar" />
-          <span className="text-sm font-semibold md:hidden">Skripsi Manager</span>
+          <span className="text-sm font-semibold md:hidden">Trackripsi.app</span>
 
           <Breadcrumb className="hidden sm:block">
             <BreadcrumbList>

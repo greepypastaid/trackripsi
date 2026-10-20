@@ -1,4 +1,4 @@
-# Fitur Baru — Arah Pengembangan Skripsi Manager
+# Fitur Baru — Arah Pengembangan Trackripsi.app
 
 Dokumen ini menjawab satu pertanyaan: **fitur apa lagi yang bikin sistem ini benar-benar dipakai mahasiswa setiap minggu, bukan cuma saat onboarding?**
 

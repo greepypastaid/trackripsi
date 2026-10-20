@@ -71,7 +71,7 @@ export function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Halo, {user?.name.split(' ')[0]}</h1>
-          <p className="text-sm text-muted-foreground">Pantau semua proyek riset skripsi Anda di satu tempat.</p>
+          <p className="text-sm text-muted-foreground">Pantau progres semua riset aktif Anda.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
