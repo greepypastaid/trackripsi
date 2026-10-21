@@ -133,8 +133,6 @@ class ResearchController extends Controller
         }
 
         $logs = $research->supervisionLogs()
-            ->when($from, fn ($q) => $q->where('meeting_date', '>=', $from->toDateString()))
-            ->when($to, fn ($q) => $q->where('meeting_date', '<=', $to->toDateString()))
             ->limit($limit)
             ->get();
         foreach ($logs as $log) {
