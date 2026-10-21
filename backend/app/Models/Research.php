@@ -31,6 +31,7 @@ class Research extends Model
         'citation_style',
         'min_supervision_sessions',
         'readiness_checklist',
+        'daily_target_minutes',
     ];
 
     protected function casts(): array
@@ -95,6 +96,16 @@ class Research extends Model
     public function defenseAnswers(): HasMany
     {
         return $this->hasMany(DefenseAnswer::class);
+    }
+
+    public function focusSessions(): HasMany
+    {
+        return $this->hasMany(FocusSession::class)->orderByDesc('started_at');
+    }
+
+    public function journalEntries(): HasMany
+    {
+        return $this->hasMany(JournalEntry::class)->orderByDesc('entry_date');
     }
 
     public function progressPercent(): int

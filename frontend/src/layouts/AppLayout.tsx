@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  BookOpen,
   CalendarClock,
+  CalendarDays,
   FileText,
   GraduationCap,
   Library,
@@ -10,12 +10,15 @@ import {
   LogOut,
   NotebookPen,
   Plus,
+  Timer,
   ShieldCheck,
 } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { GlobalSearch } from '@/components/global-search'
 import { useResearch, useResearches } from '@/services/researches'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { BrandLogo } from '@/components/brand-logo'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,6 +60,7 @@ const NAV_GROUPS = [
     label: 'Penulisan',
     items: [
       { to: 'overview', label: 'Ringkasan', Icon: LayoutDashboard },
+      { to: 'calendar', label: 'Kalender', Icon: CalendarDays },
       { to: 'chapters', label: 'Bab & Tugas', Icon: ListChecks },
       { to: 'documents', label: 'Berkas Draf', Icon: FileText },
     ],
@@ -67,6 +71,8 @@ const NAV_GROUPS = [
       { to: 'literature', label: 'Literatur', Icon: Library },
       { to: 'guidance-logs', label: 'Log Bimbingan', Icon: NotebookPen },
       { to: 'appointments', label: 'Jadwal', Icon: CalendarClock },
+      { to: 'focus', label: 'Fokus', Icon: Timer },
+      { to: 'journal', label: 'Jurnal Refleksi', Icon: NotebookPen },
     ],
   },
   {
@@ -113,11 +119,11 @@ export function AppLayout() {
               <SidebarMenuButton size="lg" asChild>
                 <Link to="/dashboard">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <BookOpen aria-hidden="true" className="size-4" />
+                    <BrandLogo className="size-7" />
                   </span>
                   <span className="grid flex-1 text-left leading-tight">
                     <span className="truncate font-semibold">Trackripsi</span>
-                    <span className="truncate text-xs text-muted-foreground">Pelacak progres TGA</span>
+                    <span className="truncate text-xs text-muted-foreground">Sahabat Skripsi Anda. </span>
                   </span>
                 </Link>
               </SidebarMenuButton>
@@ -260,6 +266,8 @@ export function AppLayout() {
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger aria-label="Buka/tutup sidebar" />
           <span className="text-sm font-semibold md:hidden">Trackripsi</span>
+
+          <GlobalSearch />
 
           <Breadcrumb className="hidden sm:block">
             <BreadcrumbList>

@@ -22,6 +22,7 @@ class ResearchRequest extends FormRequest
             'supervisor_name' => ['nullable', 'string', 'max:255'],
             'target_completion_date' => ['nullable', 'date'],
             'status' => ['sometimes', Rule::in(['active', 'completed', 'archived'])],
+            'daily_target_minutes' => ['nullable', 'integer', 'min:5', 'max:1440'],
         ];
     }
 }

@@ -63,6 +63,7 @@ export interface Research {
   citation_style?: CitationStyle
   min_supervision_sessions?: number
   readiness_checklist?: Array<{ label: string; done: boolean }>
+  daily_target_minutes?: number | null
   progress_percent?: number
   chapters?: Chapter[]
   supervision_logs?: SupervisionLog[]
@@ -71,6 +72,13 @@ export interface Research {
 
 export interface Response<T> {
   data: T
+}
+
+export interface TimelineEvent {
+  type: 'task_completed' | 'draft_uploaded' | 'supervision_logged' | 'appointment_done'
+  title: string
+  chapter: string | null
+  occurred_at: string
 }
 
 export type CitationStyle = 'apa7' | 'ieee' | 'harvard' | 'chicago_author_date'

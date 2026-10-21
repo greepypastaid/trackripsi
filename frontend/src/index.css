@@ -4,16 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Brand + status tokens (skema violet akademik, token shadcn) */
+/* Brand + status tokens: indigo Trackripsi dengan aksen cyan yang ringan. */
 @theme {
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --color-primary-50: #f5f3ff;
   --color-primary-100: #ede9fe;
-  --color-primary-500: #8b5cf6;
-  --color-primary-600: #7c3aed;
-  --color-primary-700: #6d28d9;
+  --color-primary-500: #635bff;
+  --color-primary-600: #5146e5;
+  --color-primary-700: #4035b8;
 
   --color-status-todo: oklch(0.55 0.03 260);
   --color-status-progress: oklch(0.55 0.12 240);
@@ -68,25 +68,25 @@
 
 /* Palette: violet primary + neutral tinted (shadcn token style) */
 :root {
-  --background: oklch(0.988 0.004 295);
-  --foreground: oklch(0.24 0.02 285);
+  --background: oklch(0.985 0.012 285);
+  --foreground: oklch(0.22 0.035 285);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.02 285);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.02 285);
-  --primary: oklch(0.55 0.23 291);
-  --primary-foreground: oklch(0.985 0.01 295);
-  --secondary: oklch(0.95 0.025 292);
-  --secondary-foreground: oklch(0.42 0.18 291);
-  --muted: oklch(0.965 0.008 295);
-  --muted-foreground: oklch(0.52 0.025 285);
-  --accent: oklch(0.95 0.025 292);
-  --accent-foreground: oklch(0.42 0.18 291);
+  --primary: oklch(0.55 0.24 286);
+  --primary-foreground: oklch(0.985 0.01 285);
+  --secondary: oklch(0.95 0.035 285);
+  --secondary-foreground: oklch(0.38 0.18 286);
+  --muted: oklch(0.965 0.012 285);
+  --muted-foreground: oklch(0.5 0.035 285);
+  --accent: oklch(0.95 0.035 285);
+  --accent-foreground: oklch(0.38 0.18 286);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.915 0.012 295);
-  --input: oklch(0.87 0.02 295);
-  --ring: oklch(0.6 0.19 292);
-  --chart-1: oklch(0.55 0.23 291);
+  --border: oklch(0.91 0.018 285);
+  --input: oklch(0.86 0.025 285);
+  --ring: oklch(0.6 0.2 286);
+  --chart-1: oklch(0.55 0.24 286);
   --chart-2: oklch(0.55 0.12 240);
   --chart-3: oklch(0.55 0.16 152);
   --chart-4: oklch(0.66 0.15 75);

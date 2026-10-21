@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
-import type { Chapter, Response, Research, SupervisionLog, Task } from './types'
+import type { Chapter, Response, Research, SupervisionLog, Task, TimelineEvent } from './types'
+
+export function useTimeline(id: number) {
+  return useQuery({
+    queryKey: ['timeline', id],
+    queryFn: () => api<Response<TimelineEvent[]>>(`/researches/${id}/timeline?limit=15`).then((r) => r.data),
+    enabled: Number.isFinite(id),
+  })
+}
 
 export function useResearches() {
   return useQuery({
@@ -23,6 +31,18 @@ export function useCreateResearch() {
     mutationFn: (body: Partial<Research>) =>
       api<Response<Research>>('/researches', { method: 'POST', body }).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['researches'] }),
+  })
+}
+
+export function useUpdateResearch() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: number } & Partial<Research>) =>
+      api<Response<Research>>(`/researches/${id}`, { method: 'PATCH', body }).then((r) => r.data),
+    onSuccess: (research) => {
+      qc.setQueryData<Research>(['research', research.id], (old) => (old ? { ...old, ...research } : research))
+      qc.invalidateQueries({ queryKey: ['researches'] })
+    },
   })
 }
 

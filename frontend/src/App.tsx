@@ -14,6 +14,9 @@ import { LiteraturePage } from './pages/LiteraturePage'
 import { AppointmentsPage } from './pages/AppointmentsPage'
 import { ReadinessPage } from './pages/ReadinessPage'
 import { DefensePage } from './pages/DefensePage'
+import { FocusPage } from './pages/FocusPage'
+import { JournalPage } from './pages/JournalPage'
+import { CalendarPage } from './pages/CalendarPage'
 import { LogbookPrintPage } from './pages/LogbookPrintPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -63,6 +66,9 @@ export default function App() {
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="readiness" element={<ReadinessPage />} />
               <Route path="defense" element={<DefensePage />} />
+              <Route path="focus" element={<FocusPage />} />
+              <Route path="journal" element={<JournalPage />} />
+              <Route path="calendar" element={<CalendarPage />} />
             </Route>
             {/* Cetak logbook: tanpa sidebar agar hasil print bersih. */}
             <Route

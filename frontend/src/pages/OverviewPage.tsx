@@ -1,6 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { CalendarClock, ListTodo, NotebookPen, ShieldCheck, Target, Upload } from 'lucide-react'
-import { useResearch } from '@/services/researches'
+import { format, isValid } from 'date-fns'
+import { CalendarClock, CheckCircle2, FileDown, ListTodo, NotebookPen, ShieldCheck, Target, Upload } from 'lucide-react'
+import { toast } from 'sonner'
+import { useResearch, useTimeline } from '@/services/researches'
 import { useReadiness } from '@/services/literature'
 import { ChapterStatusBadge } from '@/components/status-badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -10,10 +12,18 @@ import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 
+const EVENT_META = {
+  task_completed: { label: 'Tugas selesai', Icon: CheckCircle2, className: 'text-status-done' },
+  draft_uploaded: { label: 'Draf diunggah', Icon: Upload, className: 'text-primary' },
+  supervision_logged: { label: 'Bimbingan dicatat', Icon: NotebookPen, className: 'text-status-todo' },
+  appointment_done: { label: 'Sesi bimbingan selesai', Icon: CalendarClock, className: 'text-status-todo' },
+} as const
+
 export function OverviewPage() {
   const { researchId } = useParams()
   const id = Number(researchId)
   const { data: research, isLoading, error } = useResearch(id)
+  const { data: timeline } = useTimeline(id)
   const { data: readiness } = useReadiness(id)
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
@@ -65,6 +75,18 @@ export function OverviewPage() {
               <Upload aria-hidden="true" />
               Unggah draf
             </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const { apiRaw } = await import('@/services/download')
+              await apiRaw(`/researches/${id}/export`, `rekap-riset-${id}.md`)
+              toast.success('Rekap Markdown diunduh')
+            }}
+          >
+            <FileDown aria-hidden="true" />
+            Export rekap
           </Button>
         </nav>
       </header>
@@ -161,6 +183,48 @@ export function OverviewPage() {
           </CardContent>
         </Card>
       )}
+
+      <section aria-label="Timeline aktivitas" className="space-y-3">
+        <h2 className="text-xl font-semibold">Timeline aktivitas</h2>
+        <Card size="sm">
+          <CardContent>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Terisi otomatis: selesaikan tugas, unggah draf, catat bimbingan, atau tandai jadwal selesai.
+            </p>
+            {timeline === undefined ? (
+              <Skeleton className="h-24 w-full" />
+            ) : timeline.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Belum ada aktivitas. Selesaikan tugas atau unggah draf untuk mulai mencatat riwayat.
+              </p>
+            ) : (
+              <ol className="space-y-3">
+                {timeline.map((event, index) => {
+                  const { label, Icon, className } = EVENT_META[event.type]
+                  const date = new Date(event.occurred_at)
+                  return (
+                    <li key={`${event.type}-${event.occurred_at}-${index}`} className="flex items-start gap-3 text-sm">
+                      <Icon aria-hidden="true" className={`mt-0.5 size-4 shrink-0 ${className}`} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate">
+                          <span className="font-medium">{event.title}</span>
+                          {event.chapter ? <span className="text-muted-foreground"> · {event.chapter}</span> : null}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {label} ·{' '}
+                          <time dateTime={event.occurred_at}>
+                            {isValid(date) ? format(date, 'd MMM yyyy HH:mm') : event.occurred_at}
+                          </time>
+                        </p>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            )}
+          </CardContent>
+        </Card>
+      </section>
 
       <section aria-label="Progres per bab" className="space-y-3">
         <h2 className="text-xl font-semibold">Progres per bab</h2>

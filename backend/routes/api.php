@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\ChapterController;
 use App\Http\Controllers\Api\CitationController;
+use App\Http\Controllers\Api\FocusSessionController;
+use App\Http\Controllers\Api\JournalEntryController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\DefenseQuestionController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\LiteratureController;
@@ -35,6 +39,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('researches', ResearchController::class);
     Route::get('/researches/{research}/summary', [ResearchController::class, 'summary']);
+    Route::get('/researches/{research}/timeline', [ResearchController::class, 'timeline']);
+    Route::get('/researches/{research}/export', [ResearchController::class, 'export']);
+
+    Route::get('/researches/{research}/focus-sessions', [FocusSessionController::class, 'index']);
+    Route::post('/researches/{research}/focus-sessions', [FocusSessionController::class, 'store']);
+    Route::delete('/focus-sessions/{session}', [FocusSessionController::class, 'destroy']);
+
+    Route::get('/researches/{research}/journal', [JournalEntryController::class, 'index']);
+    Route::post('/researches/{research}/journal', [JournalEntryController::class, 'store']);
+    Route::patch('/journal/{entry}', [JournalEntryController::class, 'update']);
+    Route::delete('/journal/{entry}', [JournalEntryController::class, 'destroy']);
 
     Route::post('/researches/{research}/chapters', [ChapterController::class, 'store']);
     Route::patch('/chapters/{chapter}', [ChapterController::class, 'update']);
@@ -85,7 +100,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/researches/{research}/readiness/checklist', [ReadinessController::class, 'updateChecklist']);
 
     // F5 — Lembar logbook untuk dicetak.
+    Route::get('/search', [SearchController::class, 'search']);
     Route::get('/researches/{research}/logbook', [LogbookController::class, 'show']);
+    Route::get('/researches/{research}/calendar', [CalendarController::class, 'show']);
 
     // F6 — Bank pertanyaan sidang.
     Route::get('/researches/{research}/defense-questions', [DefenseQuestionController::class, 'index']);
