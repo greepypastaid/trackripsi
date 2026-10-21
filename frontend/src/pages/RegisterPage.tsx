@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BrandLogo } from '@/components/brand-logo'
+import { GoogleSignInButton } from '@/components/google-sign-in-button'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { useAuth } from '@/hooks/useAuth'
 import { ApiError } from '@/services/api'
@@ -160,6 +161,14 @@ export function RegisterPage() {
             {busy ? 'Menyiapkan akun…' : 'Buat akun'}
           </Button>
         </form>
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          atau
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <GoogleSignInButton />
       </div>
     </AuthLayout>
   )

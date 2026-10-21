@@ -9,7 +9,7 @@ Trackripsi adalah platform pelacak dan pengelola progres tugas akhir/skripsi man
 Karakteristik sistem:
 - **Aktor tunggal**: Khusus mahasiswa (tanpa peran dosen pembimbing, penguji, atau admin prodi).
 - **Multi-riset**: Satu akun pengguna dapat mengelola lebih dari satu proyek riset skripsi.
-- **Fitur utama**: Autentikasi email/password, manajemen milestone bab skripsi (Bab 1–5/custom), to-do list terstruktur per tahapan, repositori draf berkas mandiri, dan catatan progres berkala.
+- **Fitur utama**: Autentikasi email/password + Login Google (OAuth 2.0), manajemen milestone bab skripsi (Bab 1–5/custom), to-do list terstruktur per tahapan, repositori draf berkas mandiri, dan catatan progres berkala.
 - **Arsitektur**: Decoupled monorepo.
   - `frontend/`: React 19, Vite SPA, Tailwind CSS v4.
   - `backend/`: Laravel 12 (API only, PHP 8.4), Eloquent ORM, Laravel Sanctum.
@@ -20,9 +20,19 @@ Karakteristik sistem:
 
 1. **Strict User Scoping**: Seluruh entitas riset, milestone, tugas, dan lampiran wajib terikat pada `user_id`. Cegah IDOR via Eloquent query scoping atau Policy checks di backend.
 2. **Tanpa Fitur Approval/Review Eksternal**: Jangan membuat logic approval workflow, komentar dosen, atau role permission berjenjang. Sistem ini murni self-management tool.
-3. **Autentikasi Sederhana**: Gunakan Bearer Token via Laravel Sanctum (email & password). Dilarang menambahkan SSO, OAuth kampus, LDAP, atau verifikasi SMS/WhatsApp.
+3. **Autentikasi Sederhana**: Gunakan Bearer Token via Laravel Sanctum. Dua jalur masuk yang diizinkan: (a) email & password, (b) Login Google via OAuth 2.0 authorization code. Dilarang menambahkan SSO kampus, LDAP, OAuth provider lain (Facebook/Apple/GitHub), atau verifikasi SMS/WhatsApp.
 4. **Tailwind CSS v4 Native**: Gunakan format konfigurasi CSS-first Tailwind v4 (`@import "tailwindcss";`). Jangan membuat file `tailwind.config.js`.
 5. **No State Leaks**: Frontend SPA terpisah total dari backend. Jangan gunakan Blade view untuk logika aplikasi. Semua interaksi via REST API JSON.
+
+## Login Google (OAuth 2.0)
+
+- Backend: `GoogleAuthController` (tanpa package Socialite, cukup HTTP client + `Http::asForm()`).
+  - `GET /api/v1/auth/google/redirect` → JSON `{ "url": "..." }` berisi consent URL + `state` acak (disimpan di cache 10 menit).
+  - `GET /api/v1/auth/google/callback` → tukar `code`, ambil userinfo, lalu redirect ke `{FRONTEND_URL}/auth/google/callback#token=<token Sanctum>` atau `#error=<kode>`.
+  - Token dikirim via fragment (`#`) agar tidak tercatat di log server/referer.
+- `users.google_id` hanya boleh diisi dari klaim `sub` hasil verifikasi Google. Jangan pernah menerima `google_id` dari body/query frontend.
+- Frontend: tombol `GoogleSignInButton` di halaman login & register; `GoogleCallbackPage` menangkap token lalu memanggil `loginWithToken` dari `useAuth`.
+- Env wajib backend: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` (default `{APP_URL}/api/v1/auth/google/callback`), `FRONTEND_URL`.
 
 ## Build order
 
@@ -155,6 +165,7 @@ Sebelum menandai sebuah task selesai, pastikan kriteria berikut terpenuhi:
 ## Never do
 
 - **Dilarang memasukkan logika dosen**: Jangan menambahkan kolom `lecturer_id`, `supervisor_notes`, atau status `approved_by_supervisor`.
+- **Dilarang memalsukan identitas Google**: `google_id` hanya dari klaim `sub` terverifikasi Google. Jangan menerima `google_id`, `email_verified`, atau data profil Google dari input frontend.
 - **Dilarang hardcode ID atau Secret**: Jangan meletakkan credential, secret key, atau database connection string langsung di dalam source code. Gunakan `.env`.
 - **Dilarang mengembalikan TanStack/Next.js**: Stack resmi React 19 + Vite (folder `frontend/`), bukan Next.js.
 - **Dilarang menggunakan file tailwind.config.js**: Frontend menggunakan Tailwind CSS v4. Simpan theme extension langsung di CSS entrypoint melalui directive `@theme`.

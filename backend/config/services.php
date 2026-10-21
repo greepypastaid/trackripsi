@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'frontend_url' => env('FRONTEND_URL') ?: 'http://localhost:5173',
+    ],
+
     'openalex' => [
         // Email polite-pool OpenAlex. Tidak wajib, tapi mempercepat respons.
         'mailto' => env('OPENALEX_MAILTO'),

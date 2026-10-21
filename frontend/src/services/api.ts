@@ -44,7 +44,8 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
 
   if (response.status === 401) {
     tokenStore.clear()
-    if (!location.pathname.startsWith('/login')) location.assign('/login')
+    const publicPath = location.pathname.startsWith('/login') || location.pathname.startsWith('/auth/google/callback')
+    if (!publicPath) location.assign('/login')
     throw new ApiError(401, 'Sesi berakhir. Silakan masuk kembali.')
   }
 

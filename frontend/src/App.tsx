@@ -5,6 +5,7 @@ import { AppLayout } from './layouts/AppLayout'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { GoogleCallbackPage } from './pages/GoogleCallbackPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { OverviewPage } from './pages/OverviewPage'
 import { ChaptersPage } from './pages/ChaptersPage'
@@ -39,6 +40,7 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
             <Route
               path="/dashboard"
               element={

@@ -39,6 +39,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const startGoogleLogin = useCallback(async () => {
+    const res = await api<{ url: string }>('/auth/google/redirect')
+    window.location.assign(res.url)
+  }, [])
+
+  const loginWithToken = useCallback(async (token: string) => {
+    tokenStore.set(token)
+    try {
+      const res = await api<Response<User>>('/auth/me')
+      setUser(res.data)
+    } catch (err) {
+      tokenStore.clear()
+      throw err
+    }
+  }, [])
+
   const logout = useCallback(async () => {
     await api('/auth/logout', { method: 'POST' }).catch(() => undefined)
     tokenStore.clear()
@@ -46,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, register, startGoogleLogin, loginWithToken, logout }),
+    [user, loading, login, register, startGoogleLogin, loginWithToken, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
