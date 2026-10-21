@@ -175,4 +175,4 @@ Detail tahapan pengembangan dan pelacakan fitur:
 
 ## License
 
-MIT License. Hak cipta dilindungi. Bebas digunakan untuk pengembangan personal.
+MIT License. Hak cipta dilindungi. Bebas digunakan untuk pengembangan personal.# trackripsi
