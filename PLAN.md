@@ -1,4 +1,4 @@
-# Execution Plan — Trackripsi.app
+# Execution Plan — Trackripsi
 
 Panduan eksekusi end-to-end pembangunan aplikasi personal tracking skripsi mahasiswa.
 
@@ -11,7 +11,7 @@ Inisialisasi repositori, konfigurasi runtime, dan standardisasi design tokens.
 ### Tugas
 - [ ] Inisialisasi struktur repositori:
   ```
-  trackripsi.app/
+  trackripsi/
   ├── frontend/      # Vite + React 19 + Tailwind v4
   ├── backend/       # Laravel 12 + Sanctum (PHP 8.4)
   ├── docker/        # Dockerfile produksi, Nginx server block

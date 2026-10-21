@@ -1,4 +1,4 @@
-# Technical Specification — Trackripsi.app
+# Technical Specification — Trackripsi
 
 ## 1. Stack overview
 
@@ -38,7 +38,7 @@ Arsitektur decouple client-server:
 ## 3. Data model
 
 ```sql
--- Skema Database Trackripsi.app
+-- Skema Database Trackripsi
 
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -149,7 +149,7 @@ Header wajib request: `Accept: application/json`, `Authorization: Bearer <token>
 
 | Variable Name | Required | Deskripsi |
 | :--- | :--- | :--- |
-| `APP_NAME` | Ya | Nama instance, set: `TrackripsiApp` |
+| `APP_NAME` | Ya | Nama instance, set: `Trackripsi` |
 | `APP_ENV` | Ya | Environment runtime (`local` / `production`) |
 | `APP_KEY` | Ya | Kunci enkripsi AES-256 (generate via `php artisan key:generate`) |
 | `APP_DEBUG` | Ya | Status debug mode (`false` di production) |

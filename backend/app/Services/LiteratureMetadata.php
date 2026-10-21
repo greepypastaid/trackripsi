@@ -106,7 +106,7 @@ class LiteratureMetadata
         try {
             $response = Http::timeout(8)
                 ->acceptJson()
-                ->withUserAgent('TrackripsiApp/1.0 (mailto:'.(config('services.openalex.mailto') ?: 'noreply@example.com').')')
+                ->withUserAgent('Trackripsi/1.0 (mailto:'.(config('services.openalex.mailto') ?: 'noreply@example.com').')')
                 ->get(self::CROSSREF.rawurlencode($doi));
         } catch (ConnectionException) {
             return null;

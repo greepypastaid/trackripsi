@@ -1,4 +1,4 @@
-# Design Specification — Trackripsi.app
+# Design Specification — Trackripsi
 
 ## 1. Information architecture
 

@@ -1,4 +1,4 @@
-# Brainstorm — Trackripsi.app
+# Brainstorm — Trackripsi
 
 ## Directions
 

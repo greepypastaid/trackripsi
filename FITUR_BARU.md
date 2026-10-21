@@ -1,4 +1,4 @@
-# Fitur Baru — Arah Pengembangan Trackripsi.app
+# Fitur Baru — Arah Pengembangan Trackripsi
 
 Dokumen ini menjawab satu pertanyaan: **fitur apa lagi yang bikin sistem ini benar-benar dipakai mahasiswa setiap minggu, bukan cuma saat onboarding?**
 

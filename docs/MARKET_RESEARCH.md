@@ -1,4 +1,4 @@
-# Market Research — Trackripsi.app
+# Market Research — Trackripsi
 
 > Data mode: **estimate**. Figures without a source are
 > internal estimates, not verified data. All monetary figures are IDR (Rupiah).

@@ -105,7 +105,7 @@ class ReadinessController extends Controller
                 'label' => 'Target waktu',
                 'detail' => 'Belum mengatur tanggal target selesai riset.',
             ];
-        } elseif ($targetDate->isPast()) {
+        } elseif ($targetDate->endOfDay()->isPast()) {
             $blockers[] = [
                 'key' => 'deadline',
                 'label' => 'Target waktu',

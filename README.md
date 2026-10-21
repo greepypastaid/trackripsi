@@ -1,4 +1,4 @@
-# Trackripsi.app
+# Trackripsi
 
 Aplikasi web pelacakan progres skripsi dan multi-riset mandiri untuk mahasiswa tingkat akhir.
 
@@ -41,7 +41,7 @@ cp .env.example .env && docker compose run --rm backend php artisan key:generate
 
 Variabel kunci pada `backend/.env`:
 ```env
-APP_NAME="Trackripsi.app"
+APP_NAME="Trackripsi"
 APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
@@ -51,7 +51,7 @@ FRONTEND_URL=http://localhost:5173
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=trackripsi_manager
+DB_DATABASE=trackripsi
 DB_USERNAME=root
 DB_PASSWORD=secret
 ```
@@ -104,7 +104,7 @@ Aplikasi aktif pada:
 ## Project structure
 
 ```text
-trackripsi.app/
+trackripsi/
 ├── backend/                # Backend Laravel 12 (REST API, PHP 8.4)
 │   ├── app/                # Controllers, Models, Requests, Policies
 │   ├── config/             # Konfigurasi aplikasi backend

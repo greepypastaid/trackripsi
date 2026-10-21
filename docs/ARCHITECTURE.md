@@ -1,6 +1,6 @@
 # Architecture
 
-Dokumen arsitektur sistem Trackripsi.app. Desain sistem modular, terpisah antara frontend SPA dan backend RESTful API.
+Dokumen arsitektur sistem Trackripsi. Desain sistem modular, terpisah antara frontend SPA dan backend RESTful API.
 
 ## System context
 
@@ -14,7 +14,7 @@ Sistem berjalan independen tanpa integrasi eksternal (SIAKAD, Google OAuth, atau
                      HTTP / HTTPS (JSON)
                               v
 +-------------------------------------------------------------+
-|                   Trackripsi.app System                    |
+|                   Trackripsi System                    |
 |                                                             |
 |  +--------------------+             +--------------------+  |
 |  |     Frontend       |   REST API  |      Backend       |  |
