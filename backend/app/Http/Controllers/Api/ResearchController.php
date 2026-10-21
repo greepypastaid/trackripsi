@@ -132,7 +132,12 @@ class ResearchController extends Controller
             ]);
         }
 
-        foreach ($research->supervisionLogs()->limit($limit)->get() as $log) {
+        $logs = $research->supervisionLogs()
+            ->when($from, fn ($q) => $q->where('meeting_date', '>=', $from->toDateString()))
+            ->when($to, fn ($q) => $q->where('meeting_date', '<=', $to->toDateString()))
+            ->limit($limit)
+            ->get();
+        foreach ($logs as $log) {
             $events->push([
                 'type' => 'supervision_logged',
                 'title' => Str::limit($log->feedback_notes, 80),

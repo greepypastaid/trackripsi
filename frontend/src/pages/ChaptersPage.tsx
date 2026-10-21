@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
+import { format } from 'date-fns'
 import { CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCreateTask, useResearch, useToggleTask, useUpdateChapter } from '@/services/researches'
 import { ChapterStatusBadge } from '@/components/status-badge'
+import { DatePicker } from '@/components/date-picker'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
@@ -198,21 +200,20 @@ export function ChaptersPage() {
                       <Label htmlFor={`new-task-due-${chapter.id}`} className="sr-only">
                         Tenggat (opsional)
                       </Label>
-                      <Input
-                        id={`new-task-due-${chapter.id}`}
-                        type="date"
-                        aria-label={`Tenggat tugas ${chapter.title}`}
-                        className="w-40"
-                        value={draft.due}
-                        onChange={(e) =>
+                      <DatePicker
+                        value={draft.due ? new Date(`${draft.due}T00:00:00`) : undefined}
+                        onChange={(value) =>
                           setDrafts((prev) => ({
                             ...prev,
                             [chapter.id]: {
                               title: prev[chapter.id]?.title ?? '',
-                              due: e.target.value,
+                              due: value ? format(value, 'yyyy-MM-dd') : '',
                             },
                           }))
                         }
+                        placeholder="Tenggat (opsional)"
+                        ariaLabel={`Tenggat tugas ${chapter.title}`}
+                        className="w-44"
                       />
                     </div>
                     <Button type="submit" variant="outline" disabled={createTask.isPending}>

@@ -4,6 +4,7 @@ use App\Models\Chapter;
 use App\Models\DocumentDraft;
 use App\Models\Research;
 use App\Models\SupervisionLog;
+use App\Models\Task;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
 

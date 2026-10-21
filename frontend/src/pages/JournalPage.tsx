@@ -8,13 +8,13 @@ import { api, ApiError } from '@/services/api'
 import { useResearch } from '@/services/researches'
 import type { Response } from '@/services/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { DatePicker } from '@/components/date-picker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
 
 interface JournalEntry {
   id: number
@@ -45,7 +45,7 @@ export function JournalPage() {
   const [month, setMonth] = useState(format(new Date(), 'yyyy-MM'))
   const { data: entries, isLoading: loadingEntries } = useJournal(id, month)
   const qc = useQueryClient()
-  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+  const [date, setDate] = useState<Date | undefined>(new Date())
   const [mood, setMood] = useState<JournalEntry['mood']>('biasa')
   const [body, setBody] = useState('')
 
@@ -87,7 +87,7 @@ export function JournalPage() {
       toast.error('Isi catatan dulu.')
       return
     }
-    create.mutate({ entry_date: date, mood, body: body.trim() })
+    create.mutate({ entry_date: date ? format(date, 'yyyy-MM-dd') : '', mood, body: body.trim() })
   }
 
   return (
@@ -97,24 +97,57 @@ export function JournalPage() {
           <h1 className="text-2xl font-bold tracking-tight">Jurnal Refleksi</h1>
           <p className="text-sm text-muted-foreground">Catatan harian progres &amp; hambatan {research.title}.</p>
         </div>
-        <Input
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value || format(new Date(), 'yyyy-MM'))}
-          className="w-44"
-          aria-label="Filter bulan"
-        />
+        <div className="flex items-center gap-2" aria-label="Filter bulan">
+          <Select value={month.slice(0, 4)} onValueChange={(year: string) => setMonth(`${year}-${month.slice(5)}`)}>
+            <SelectTrigger className="w-24" aria-label="Tahun">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - 2 + i)).map((year) => (
+                <SelectItem key={year} value={year}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={month.slice(5)} onValueChange={(m) => setMonth(`${month.slice(0, 4)}-${m}`)}>
+            <SelectTrigger className="w-36" aria-label="Bulan">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(
+                [
+                  ['01', 'Januari'],
+                  ['02', 'Februari'],
+                  ['03', 'Maret'],
+                  ['04', 'April'],
+                  ['05', 'Mei'],
+                  ['06', 'Juni'],
+                  ['07', 'Juli'],
+                  ['08', 'Agustus'],
+                  ['09', 'September'],
+                  ['10', 'Oktober'],
+                  ['11', 'November'],
+                  ['12', 'Desember'],
+                ] as const
+              ).map(([value, name]) => (
+                <SelectItem key={value} value={value}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </header>
 
       <Card size="sm">
         <CardContent>
           <form onSubmit={submit} className="grid gap-3 md:grid-cols-[auto_1fr_auto]">
-            <Input
-              type="date"
+            <DatePicker
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              aria-label="Tanggal"
-              className="md:w-40"
+              onChange={(value) => setDate(value ?? undefined)}
+              ariaLabel="Tanggal jurnal"
+              className="md:w-44"
             />
             <Select value={mood} onValueChange={(v) => setMood(v as JournalEntry['mood'])}>
               <SelectTrigger aria-label="Suasana">

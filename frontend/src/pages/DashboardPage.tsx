@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { format } from 'date-fns'
 import { BookOpen, CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
+import { DatePicker } from '@/components/date-picker'
 import { useCreateResearch, useResearches } from '@/services/researches'
 import { useAppointments } from '@/services/literature'
 import { ResearchStatusBadge } from '@/components/status-badge'
@@ -114,11 +116,10 @@ export function DashboardPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="target">Target selesai (opsional)</Label>
-                <Input
-                  id="target"
-                  type="date"
-                  value={form.target}
-                  onChange={(e) => setForm((prev) => ({ ...prev, target: e.target.value }))}
+                <DatePicker
+                  value={form.target ? new Date(`${form.target}T00:00:00`) : undefined}
+                  onChange={(value) => setForm((prev) => ({ ...prev, target: value ? format(value, 'yyyy-MM-dd') : '' }))}
+                  ariaLabel="Target selesai"
                 />
               </div>
             </form>

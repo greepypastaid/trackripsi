@@ -123,7 +123,7 @@ export function AppLayout() {
                   </span>
                   <span className="grid flex-1 text-left leading-tight">
                     <span className="truncate font-semibold">Trackripsi</span>
-                    <span className="truncate text-xs text-muted-foreground">Sahabat Skripsi Anda. </span>
+                    <span className="truncate text-xs text-muted-foreground">Sahabat Skripsi Kamu! </span>
                   </span>
                 </Link>
               </SidebarMenuButton>

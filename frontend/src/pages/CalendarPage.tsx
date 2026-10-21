@@ -1,19 +1,18 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock, NotebookPen, BookOpen, Plus, Video } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock, NotebookPen, BookOpen, Plus, Trash2, Video } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/services/api'
 import { useResearch } from '@/services/researches'
 import { useAppointmentMutations } from '@/services/literature'
 import type { Response } from '@/services/types'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { DatePicker } from '@/components/date-picker'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -52,8 +53,40 @@ export function CalendarPage() {
   const { data: days, isLoading: loadingDays } = useCalendar(id, cursor)
   const qc = useQueryClient()
   const { create } = useAppointmentMutations(Number.isFinite(id) ? id : Number.NaN)
+  const invalidateCalendar = () => {
+    qc.invalidateQueries({ queryKey: ['calendar', id] })
+  }
+  const toggleTask = useMutation({
+    mutationFn: (taskId: number) => api(`/tasks/${taskId}/toggle`, { method: 'PATCH' }),
+    onSuccess: () => {
+      invalidateCalendar()
+      qc.invalidateQueries({ queryKey: ['research', id] })
+    },
+  })
+  const deleteTask = useMutation({
+    mutationFn: (taskId: number) => api(`/tasks/${taskId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      invalidateCalendar()
+      qc.invalidateQueries({ queryKey: ['research', id] })
+    },
+  })
+  const deleteAppointment = useMutation({
+    mutationFn: (appointmentId: number) => api(`/appointments/${appointmentId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      invalidateCalendar()
+      qc.invalidateQueries({ queryKey: ['appointments', id] })
+    },
+  })
+  const deleteJournal = useMutation({
+    mutationFn: (entryId: number) => api(`/journal/${entryId}`, { method: 'DELETE' }),
+    onSuccess: invalidateCalendar,
+  })
   const [addOpen, setAddOpen] = useState(false)
-  const [form, setForm] = useState({ date: '', time: '09:00', agenda: '' })
+  const [form, setForm] = useState<{ date: Date | undefined; time: string; agenda: string }>({
+    date: undefined,
+    time: '09:00',
+    agenda: '',
+  })
 
   const grid = useMemo(() => {
     const first = new Date(`${cursor}-01T00:00:00`)
@@ -74,15 +107,23 @@ export function CalendarPage() {
   }
 
   const openAdd = (date: string) => {
-    setForm({ date, time: '09:00', agenda: '' })
+    setForm({
+      date: date === format(new Date(), 'yyyy-MM-dd') ? new Date() : new Date(`${date}T00:00:00`),
+      time: '09:00',
+      agenda: '',
+    })
     setAddOpen(true)
   }
 
   const submitAdd = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!form.date) {
+      toast.error('Pilih tanggal dulu.')
+      return
+    }
     try {
       await create.mutateAsync({
-        scheduled_at: `${form.date} ${form.time}:00`,
+        scheduled_at: `${format(form.date, 'yyyy-MM-dd')} ${form.time}:00`,
         agenda: form.agenda
           .split('\n')
           .map((line) => line.trim())
@@ -218,34 +259,76 @@ export function CalendarPage() {
                 {selectedData!.tasks?.map((task) => {
                   const done = task.is_completed
                   return (
-                    <p key={`task-${task.id}`} className="flex items-center gap-1.5">
-                      {done ? (
-                        <CheckCircle2 aria-hidden="true" className="size-4 text-status-done" />
-                      ) : (
-                        <Circle aria-hidden="true" className="size-4 text-muted-foreground" />
-                      )}
-                      <span className={done ? 'line-through' : 'font-medium'}>{task.title}</span>
-                    </p>
+                    <div key={`task-${task.id}`} className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        aria-label={done ? `Tandai ${task.title} belum selesai` : `Selesaikan ${task.title}`}
+                        onClick={() => toggleTask.mutate(task.id)}
+                        className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
+                      >
+                        {done ? (
+                          <CheckCircle2 aria-hidden="true" className="size-4 shrink-0 text-status-done" />
+                        ) : (
+                          <Circle aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className={`truncate ${done ? 'line-through' : 'font-medium'}`}>{task.title}</span>
+                      </button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Hapus tugas ${task.title}`}
+                        onClick={() => deleteTask.mutate(task.id)}
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </Button>
+                    </div>
                   )
                 })}
                 {selectedData!.appointments?.map((appointment) => (
-                  <p key={`appt-${appointment.id}`} className="flex items-center gap-1.5">
-                    <Video aria-hidden="true" className="size-4 text-amber-500" />
-                    Bimbingan {format(new Date(appointment.scheduled_at), 'HH:mm')}
-                    <span className="text-muted-foreground">({appointment.status})</span>
-                  </p>
+                  <div key={`appt-${appointment.id}`} className="flex items-center gap-1.5">
+                    <p className="flex min-w-0 flex-1 items-center gap-1.5">
+                      <Video aria-hidden="true" className="size-4 shrink-0 text-amber-500" />
+                      <span className="truncate">
+                        Bimbingan {format(new Date(appointment.scheduled_at), 'HH:mm')}
+                        <span className="text-muted-foreground"> ({appointment.status})</span>
+                      </span>
+                    </p>
+                    {appointment.status === 'planned' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Batalkan jadwal"
+                        onClick={() => deleteAppointment.mutate(appointment.id)}
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
                 ))}
                 {selectedData!.supervision?.map((log) => (
                   <p key={`log-${log.id}`} className="flex items-center gap-1.5">
-                    <NotebookPen aria-hidden="true" className="size-4 text-violet-500" />
-                    {log.title}
+                    <NotebookPen aria-hidden="true" className="size-4 shrink-0 text-violet-500" />
+                    <span className="truncate">{log.title}</span>
                   </p>
                 ))}
                 {selectedData!.journal?.map((entry) => (
-                  <p key={`journal-${entry.id}`} className="flex items-center gap-1.5">
-                    <BookOpen aria-hidden="true" className="size-4 text-emerald-500" />
-                    Jurnal · mood {entry.mood}
-                  </p>
+                  <div key={`journal-${entry.id}`} className="flex items-center gap-1.5">
+                    <p className="flex min-w-0 flex-1 items-center gap-1.5">
+                      <BookOpen aria-hidden="true" className="size-4 shrink-0 text-emerald-500" />
+                      <span className="truncate">Jurnal · mood {entry.mood}</span>
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Hapus entri jurnal"
+                      onClick={() => deleteJournal.mutate(entry.id)}
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </Button>
+                  </div>
                 ))}
               </>
             )}
@@ -263,25 +346,48 @@ export function CalendarPage() {
           </DialogHeader>
           <form onSubmit={submitAdd} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="appt-date">Tanggal</Label>
-                <Input
-                  id="appt-date"
-                  type="date"
-                  required
+              <div className="flex flex-col gap-2">
+                <Label>Tanggal</Label>
+                <DatePicker
                   value={form.date}
-                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                  onChange={(value) => setForm((f) => ({ ...f, date: value }))}
+                  ariaLabel="Tanggal jadwal"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="appt-time">Jam</Label>
-                <Input
-                  id="appt-time"
-                  type="time"
-                  required
-                  value={form.time}
-                  onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-                />
+              <div className="flex flex-col gap-2">
+                <Label>Jam</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={form.time.slice(0, 2)}
+                    onValueChange={(hour) => setForm((f) => ({ ...f, time: `${hour}:${f.time.slice(3)}` }))}
+                  >
+                    <SelectTrigger aria-label="Jam" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map((hour) => (
+                        <SelectItem key={hour} value={hour}>
+                          {hour}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={form.time.slice(3)}
+                    onValueChange={(minute) => setForm((f) => ({ ...f, time: `${f.time.slice(0, 2)}:${minute}` }))}
+                  >
+                    <SelectTrigger aria-label="Menit" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['00', '15', '30', '45'].map((minute) => (
+                        <SelectItem key={minute} value={minute}>
+                          {minute}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             <div className="space-y-1.5">
