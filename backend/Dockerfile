@@ -9,11 +9,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+# Dev image butuh dev-dependencies (pest/phpunit). Vendor host tidak ikut build context
+# (lihat backend/.dockerignore), jadi semuanya di-install di dalam image.
+RUN composer install --no-scripts --optimize-autoloader --prefer-dist --no-interaction
 
 COPY . .
-RUN composer dump-autoload --optimize \
-    && chown -R www-data:www-data storage bootstrap/cache \
+RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini

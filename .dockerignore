@@ -1,0 +1,14 @@
+# Build context root dipakai docker/Dockerfile.frontend.
+.git
+.gitignore
+.env
+.env.*
+**/node_modules
+backend/vendor
+backend/storage/logs
+backend/bootstrap/cache/*.php
+frontend/dist
+**/*.md
+docker-compose*.yml
+deploy.sh
+docs
