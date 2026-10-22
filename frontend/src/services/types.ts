@@ -136,8 +136,17 @@ export interface ReadinessBlocker {
   detail: string
 }
 
+export interface ReadinessCheck {
+  key: string
+  label: string
+  weight: number
+  progress: number
+  detail: string
+}
+
 export interface Readiness {
   score: number
+  checks: ReadinessCheck[]
   blockers: ReadinessBlocker[]
   stats: {
     chapters_completed: number

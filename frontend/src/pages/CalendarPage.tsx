@@ -24,6 +24,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Textarea } from '@/components/ui/textarea'
 
 interface CalendarDay {
@@ -93,6 +94,12 @@ export function CalendarPage() {
     mutationFn: (entryId: number) => api(`/journal/${entryId}`, { method: 'DELETE' }),
     onSuccess: invalidateCalendar,
   })
+  const [confirm, setConfirm] = useState<{
+    title: string
+    description: string
+    confirmLabel: string
+    run: () => void
+  } | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [form, setForm] = useState<{ date: Date | undefined; time: string; agenda: string }>({
     date: undefined,
@@ -290,7 +297,14 @@ export function CalendarPage() {
                         variant="ghost"
                         size="icon-sm"
                         aria-label={`Hapus tugas ${task.title}`}
-                        onClick={() => deleteTask.mutate(task.id)}
+                        onClick={() =>
+                          setConfirm({
+                            title: 'Hapus tugas ini?',
+                            description: `“${task.title}” bakal hilang dari bab asalnya.`,
+                            confirmLabel: 'Ya, hapus',
+                            run: () => deleteTask.mutate(task.id),
+                          })
+                        }
                       >
                         <Trash2 aria-hidden="true" />
                       </Button>
@@ -315,7 +329,14 @@ export function CalendarPage() {
                         variant="ghost"
                         size="icon-sm"
                         aria-label="Batalkan jadwal"
-                        onClick={() => deleteAppointment.mutate(appointment.id)}
+                        onClick={() =>
+                          setConfirm({
+                            title: 'Batalkan jadwal ini?',
+                            description: `Jadwal bimbingan jam ${format(new Date(appointment.scheduled_at), 'HH:mm')} bakal dihapus, bukan ditandai selesai.`,
+                            confirmLabel: 'Ya, batalkan',
+                            run: () => deleteAppointment.mutate(appointment.id),
+                          })
+                        }
                       >
                         <Trash2 aria-hidden="true" />
                       </Button>
@@ -339,7 +360,15 @@ export function CalendarPage() {
                       variant="ghost"
                       size="icon-sm"
                       aria-label="Hapus entri jurnal"
-                      onClick={() => deleteJournal.mutate(entry.id)}
+                      onClick={() =>
+                        setConfirm({
+                          title: 'Hapus entri jurnal ini?',
+                          description:
+                            'Catatan harian beserta suasananya bakal hilang dan nggak bisa dikembalikan.',
+                          confirmLabel: 'Ya, hapus',
+                          run: () => deleteJournal.mutate(entry.id),
+                        })
+                      }
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -350,6 +379,19 @@ export function CalendarPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(open) => !open && setConfirm(null)}
+        title={confirm?.title ?? ''}
+        description={confirm?.description ?? ''}
+        confirmLabel={confirm?.confirmLabel}
+        pending={deleteTask.isPending || deleteAppointment.isPending || deleteJournal.isPending}
+        onConfirm={() => {
+          confirm?.run()
+          setConfirm(null)
+        }}
+      />
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">

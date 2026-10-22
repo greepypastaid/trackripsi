@@ -10,6 +10,7 @@ import {
 import { useResearch } from '@/services/researches'
 import { ApiError } from '@/services/api'
 import { EmptyState } from '@/components/empty-state'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -63,6 +64,12 @@ export function AppointmentsPage() {
   const [agenda, setAgenda] = useState('')
   const [completing, setCompleting] = useState<number | null>(null)
   const [session, setSession] = useState({ chapterId: 'none', notes: '', items: '' })
+  const [confirm, setConfirm] = useState<null | {
+    title: string
+    description: string
+    confirmLabel: string
+    run: () => void
+  }>(null)
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
@@ -298,14 +305,31 @@ export function AppointmentsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => update.mutate({ appointmentId: appointment.id, status: 'cancelled' })}
+                        onClick={() =>
+                          setConfirm({
+                            title: 'Batalkan jadwal ini?',
+                            description:
+                              'Jadwalnya tetap kelihatan di riwayat, tapi ditandai batal. Nggak ada agenda yang hilang.',
+                            confirmLabel: 'Ya, batalkan',
+                            run: () =>
+                              update.mutate({ appointmentId: appointment.id, status: 'cancelled' }),
+                          })
+                        }
                       >
                         Batalkan
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => remove.mutate(appointment.id)}
+                        onClick={() =>
+                          setConfirm({
+                            title: 'Hapus jadwal ini?',
+                            description:
+                              'Jadwal beserta agendanya bakal hilang permanen. Kalau cuma nggak jadi, pakai tombol Batalkan.',
+                            confirmLabel: 'Ya, hapus',
+                            run: () => remove.mutate(appointment.id),
+                          })
+                        }
                         aria-label="Hapus jadwal"
                       >
                         <Trash2 aria-hidden="true" />
@@ -397,6 +421,19 @@ export function AppointmentsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(open) => !open && setConfirm(null)}
+        title={confirm?.title ?? ''}
+        description={confirm?.description ?? ''}
+        confirmLabel={confirm?.confirmLabel}
+        pending={remove.isPending || update.isPending}
+        onConfirm={() => {
+          confirm?.run()
+          setConfirm(null)
+        }}
+      />
     </div>
   )
 }

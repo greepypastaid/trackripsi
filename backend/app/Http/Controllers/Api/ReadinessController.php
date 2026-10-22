@@ -113,13 +113,83 @@ class ReadinessController extends Controller
             ];
         }
 
-        // 6 cek inti + setiap butir checklist kampus dihitung sebagai satu cek.
-        $totalChecks = 6 + count($checklist);
-        $passed = max(0, $totalChecks - count($blockers));
-        $score = (int) round(($passed / max(1, $totalChecks)) * 100);
+        // Skor dihitung proporsional per komponen, bukan lulus/gagal per cek.
+        // Kalau pakai lulus/gagal, riset baru yang target waktunya sudah diisi
+        // langsung dapat 17% dan skornya diam saja sampai satu bab kelar total.
+        $draftedChapters = $chapterCount - $chaptersWithoutDraft->count();
+        $totalActionItems = $research->supervisionLogs
+            ->flatMap(fn (SupervisionLog $log) => $log->actionItems)
+            ->count();
+        $checklistDone = count(array_filter($checklist, fn ($item) => $item['done'] ?? false));
+        $logProgress = min(1, $logCount / max(1, $minSessions));
+
+        $checks = [
+            [
+                'key' => 'chapters',
+                'label' => 'Bab selesai',
+                'weight' => 30,
+                'progress' => $chapterCount > 0 ? $completedChapters / $chapterCount : 0.0,
+                'detail' => "{$completedChapters} dari {$chapterCount} bab selesai.",
+            ],
+            [
+                'key' => 'drafts',
+                'label' => 'Draf tiap bab',
+                'weight' => 20,
+                'progress' => $chapterCount > 0 ? $draftedChapters / $chapterCount : 0.0,
+                'detail' => "{$draftedChapters} dari {$chapterCount} bab punya draf.",
+            ],
+            [
+                'key' => 'supervision',
+                'label' => 'Sesi bimbingan',
+                'weight' => 20,
+                'progress' => $logProgress,
+                'detail' => "{$logCount} dari {$minSessions} sesi tercatat.",
+            ],
+            [
+                'key' => 'action_items',
+                'label' => 'Poin revisi beres',
+                'weight' => 15,
+                // Kalau belum ada poin revisi sama sekali, kepercayaan "bebas
+                // revisi" cuma sebesar porsi sesi yang sudah dijalani. Tanpa ini
+                // satu sesi bimbingan langsung mengkasih bobot penuh 15%.
+                'progress' => $totalActionItems === 0
+                    ? $logProgress
+                    : ($totalActionItems - $openActionItems) / $totalActionItems,
+                'detail' => $totalActionItems === 0
+                    ? 'Belum ada poin revisi tercatat.'
+                    : ($totalActionItems - $openActionItems)." dari {$totalActionItems} poin revisi beres.",
+            ],
+            [
+                'key' => 'bibliography',
+                'label' => 'Daftar pustaka',
+                'weight' => 15,
+                'progress' => min(1, $included / 10),
+                'detail' => "{$included} dari 10 sumber masuk.",
+            ],
+        ];
+
+        if (count($checklist) > 0) {
+            $checks[] = [
+                'key' => 'checklist',
+                'label' => 'Checklist kampus',
+                'weight' => 20,
+                'progress' => $checklistDone / count($checklist),
+                'detail' => "{$checklistDone} dari ".count($checklist).' butir beres.',
+            ];
+        }
+
+        // Target waktu cuma pengingat, bukan progres, jadi bobotnya nol dan
+        // nggak bikin skor naik hanya karena tanggalnya diisi.
+        $weightSum = max(1, array_sum(array_column($checks, 'weight')));
+        $earned = array_sum(array_map(
+            fn (array $check) => $check['weight'] * $check['progress'],
+            $checks,
+        ));
+        $score = (int) round(($earned / $weightSum) * 100);
 
         return response()->json(['data' => [
             'score' => $score,
+            'checks' => $checks,
             'blockers' => $blockers,
             'stats' => [
                 'chapters_completed' => $completedChapters,

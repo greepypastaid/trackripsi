@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { NotebookPen, Send, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { toast } from 'sonner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/services/api'
@@ -48,6 +49,11 @@ export function JournalPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [mood, setMood] = useState<JournalEntry['mood']>('biasa')
   const [body, setBody] = useState('')
+  const [confirm, setConfirm] = useState<null | {
+    title: string
+    description: string
+    run: () => void
+  }>(null)
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['journal', id] })
 
@@ -207,7 +213,14 @@ export function JournalPage() {
                           variant="ghost"
                           size="icon-sm"
                           aria-label="Hapus entri"
-                          onClick={() => remove.mutate(entry.id)}
+                          onClick={() =>
+                            setConfirm({
+                              title: 'Hapus entri jurnal ini?',
+                              description:
+                                'Catatan harian beserta suasananya bakal hilang dan nggak bisa dikembalikan.',
+                              run: () => remove.mutate(entry.id),
+                            })
+                          }
                         >
                           <Trash2 aria-hidden="true" />
                         </Button>
@@ -221,6 +234,18 @@ export function JournalPage() {
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(open) => !open && setConfirm(null)}
+        title={confirm?.title ?? ''}
+        description={confirm?.description ?? ''}
+        pending={remove.isPending}
+        onConfirm={() => {
+          confirm?.run()
+          setConfirm(null)
+        }}
+      />
     </div>
   )
 }

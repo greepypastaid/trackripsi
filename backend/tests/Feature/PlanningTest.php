@@ -110,6 +110,40 @@ it('calculates readiness blockers and score', function () {
     expect($response->json('data.score'))->toBeLessThan(100);
 });
 
+it('scores readiness proportionally so an untouched research starts at zero', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+    $research = Research::factory()->for($user)->create();
+
+    $base = $this->getJson("/api/v1/researches/{$research->id}/readiness")->assertOk()->json('data');
+
+    // Target waktu sudah diisi factory, tapi itu bukan progres: skor tetap 0.
+    expect($base['score'])->toBe(0);
+    expect($base['checks'])->toHaveCount(5);
+
+    $chapter = $research->chapters()->create([
+        'title' => 'Bab 1: Pendahuluan',
+        'order' => 1,
+        'status' => 'completed',
+    ]);
+
+    $after = $this->getJson("/api/v1/researches/{$research->id}/readiness")->json('data');
+
+    // 1 dari 1 bab selesai cuma menyumbang bobot bab (30%), bukan skor penuh.
+    expect($after['score'])->toBe(30);
+
+    $chapter->update(['status' => 'in_progress']);
+    $this->postJson("/api/v1/researches/{$research->id}/logs", [
+        'meeting_date' => now()->toDateString(),
+        'feedback_notes' => 'Bimbingan awal',
+    ])->assertCreated();
+
+    // Satu sesi dari 12 minimal cuma menyumbang sebagian kecil bobot bimbingan.
+    $partial = $this->getJson("/api/v1/researches/{$research->id}/readiness")->json('data');
+    expect($partial['score'])->toBe(3);
+    expect(collect($partial['checks'])->firstWhere('key', 'supervision')['progress'])->toBeLessThan(0.1);
+});
+
 it('stores a manual readiness checklist per research', function () {
     $user = User::factory()->create();
     Sanctum::actingAs($user);

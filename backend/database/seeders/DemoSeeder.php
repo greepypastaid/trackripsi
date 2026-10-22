@@ -36,11 +36,15 @@ class DemoSeeder extends Seeder
             }
         }
 
-        $research->supervisionLogs()->create([
-            'chapter_id' => $research->chapters()->first()->id,
+        $log = $research->supervisionLogs()->create([
             'meeting_date' => now()->subWeek()->toDateString(),
             'feedback_notes' => 'Perbaiki rumusan masalah dan tambah referensi 5 tahun terakhir.',
-        ])->actionItems()->createMany([
+        ]);
+
+        // Bab terkait sekarang lewat tabel pivot, bukan kolom chapter_id.
+        $log->chapters()->attach($research->chapters()->first()->id);
+
+        $log->actionItems()->createMany([
             ['description' => 'Tulis ulang latar belakang'],
             ['description' => 'Tambah 3 jurnal SINTA 2'],
         ]);

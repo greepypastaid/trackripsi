@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Flame, Pause, Play, Timer, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { toast } from 'sonner'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/services/api'
@@ -52,6 +53,11 @@ export function FocusPage() {
   const [seconds, setSeconds] = useState(0)
   const [running, setRunning] = useState(false)
   const [note, setNote] = useState('')
+  const [confirm, setConfirm] = useState<null | {
+    title: string
+    description: string
+    run: () => void
+  }>(null)
   const startedAtRef = useRef<Date | null>(null)
 
   useEffect(() => {
@@ -222,7 +228,13 @@ export function FocusPage() {
                       variant="ghost"
                       size="icon-sm"
                       aria-label={`Hapus sesi ${session.duration_minutes} menit`}
-                      onClick={() => deleteSession.mutate(session.id)}
+                      onClick={() =>
+                        setConfirm({
+                          title: 'Hapus sesi fokus ini?',
+                          description: `Sesi ${session.duration_minutes} menit pada ${format(new Date(session.started_at), 'd MMM yyyy HH:mm')} bakal hilang dari riwayat.`,
+                          run: () => deleteSession.mutate(session.id),
+                        })
+                      }
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -233,6 +245,18 @@ export function FocusPage() {
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(open) => !open && setConfirm(null)}
+        title={confirm?.title ?? ''}
+        description={confirm?.description ?? ''}
+        pending={deleteSession.isPending}
+        onConfirm={() => {
+          confirm?.run()
+          setConfirm(null)
+        }}
+      />
     </div>
   )
 }

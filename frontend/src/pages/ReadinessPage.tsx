@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { CircleAlert, CircleCheck, Plus, Save, ShieldCheck, Trash2 } from 'lucide-react'
+import { CalendarClock, CircleAlert, CircleCheck, Plus, Save, ShieldCheck, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useReadiness, useUpdateReadinessChecklist } from '@/services/literature'
 import { useResearch } from '@/services/researches'
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 
 export function ReadinessPage() {
   const { researchId } = useParams()
@@ -19,6 +20,11 @@ export function ReadinessPage() {
   const updateChecklist = useUpdateReadinessChecklist(id)
 
   const [label, setLabel] = useState('')
+  const [confirm, setConfirm] = useState<null | {
+    title: string
+    description: string
+    run: () => void
+  }>(null)
   const checklist = research?.readiness_checklist ?? []
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
@@ -42,7 +48,8 @@ export function ReadinessPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Kesiapan Sidang</h1>
         <p className="text-sm text-muted-foreground">
-          Skornya dihitung dari data risetmu. Yang perlu kamu isi sendiri cuma checklist kampus.
+          Skor naik bertahap tiap bab selesai, draf diunggah, sesi bimbingan tercatat, dan sumber
+          masuk daftar pustaka. Yang perlu kamu isi sendiri cuma checklist kampus.
         </p>
       </header>
 
@@ -58,20 +65,45 @@ export function ReadinessPage() {
                 {readiness.score}%
               </p>
               <Progress value={readiness.score} aria-label="Skor kesiapan sidang" />
-              <dl className="grid grid-cols-2 gap-2 pt-2 text-sm">
-                {[
-                  ['Bab selesai', `${readiness.stats.chapters_completed}/${readiness.stats.chapters_total}`],
-                  ['Sesi bimbingan', `${readiness.stats.supervision_logs}/${readiness.stats.min_supervision_sessions}`],
-                  ['Sumber masuk', `${readiness.stats.literature_included}/${readiness.stats.literature_total}`],
-                  ['Poin revisi terbuka', String(readiness.stats.open_action_items)],
-                  ['Jadwal mendatang', String(readiness.stats.upcoming_appointments)],
-                ].map(([term, value]) => (
-                  <div key={term} className="rounded-lg border px-3 py-2">
-                    <dt className="text-xs text-muted-foreground">{term}</dt>
-                    <dd className="font-mono font-semibold">{value}</dd>
-                  </div>
-                ))}
-              </dl>
+
+              <div className="space-y-2.5 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Rincian penilaian</p>
+                <ul className="space-y-2">
+                  {readiness.checks.map((check) => (
+                    <li key={check.key} className="space-y-1">
+                      <div className="flex items-baseline justify-between gap-2 text-xs">
+                        <span className="flex items-center gap-1.5">
+                          {check.progress >= 1 ? (
+                            <CircleCheck aria-hidden="true" className="size-3.5 text-status-done" />
+                          ) : (
+                            <CircleAlert
+                              aria-hidden="true"
+                              className="size-3.5 text-status-revision"
+                            />
+                          )}
+                          {check.label}
+                          <span className="text-muted-foreground">({check.weight}%)</span>
+                        </span>
+                        <span className="font-mono text-muted-foreground">
+                          {Math.round(check.progress * 100)}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={check.progress * 100}
+                        aria-label={`Progres ${check.label}`}
+                        className="h-1"
+                      />
+                      <p className="text-[0.7rem] text-muted-foreground">{check.detail}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <p className="flex items-center gap-1.5 pt-1 text-xs text-muted-foreground">
+                <CalendarClock aria-hidden="true" className="size-3" />
+                {readiness.stats.upcoming_appointments} jadwal bimbingan mendatang ·{' '}
+                {readiness.stats.open_action_items} poin revisi terbuka
+              </p>
             </CardContent>
           </Card>
 
@@ -106,7 +138,13 @@ export function ReadinessPage() {
                       size="icon-sm"
                       variant="ghost"
                       aria-label={`Hapus butir ${item.label}`}
-                      onClick={() => save(checklist.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setConfirm({
+                          title: 'Hapus butir ini?',
+                          description: `“${item.label}” bakal hilang dari checklist kesiapan.`,
+                          run: () => save(checklist.filter((_, i) => i !== index)),
+                        })
+                      }
                     >
                       <Trash2 aria-hidden="true" />
                     </Button>
@@ -168,6 +206,18 @@ export function ReadinessPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(open) => !open && setConfirm(null)}
+        title={confirm?.title ?? ''}
+        description={confirm?.description ?? ''}
+        pending={updateChecklist.isPending}
+        onConfirm={() => {
+          confirm?.run()
+          setConfirm(null)
+        }}
+      />
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Save aria-hidden="true" className="size-3" />
