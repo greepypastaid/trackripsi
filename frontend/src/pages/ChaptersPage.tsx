@@ -24,7 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type { ChapterStatus } from '@/services/types'
 
 const STATUSES: { value: ChapterStatus; label: string }[] = [
-  { value: 'not_started', label: 'Belum Mulai' },
+  { value: 'not_started', label: 'Belum mulai' },
   { value: 'in_progress', label: 'Dikerjakan' },
   { value: 'revision', label: 'Revisi' },
   { value: 'completed', label: 'Selesai' },
@@ -44,7 +44,7 @@ export function ChaptersPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat bab riset.</AlertDescription>
+        <AlertDescription>Bab-nya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -57,7 +57,7 @@ export function ChaptersPage() {
       await createTask.mutateAsync({ chapterId, title, due_date: draft.due || undefined })
       setDrafts((prev) => ({ ...prev, [chapterId]: { title: '', due: '' } }))
     } catch {
-      toast.error('Gagal menambah tugas.')
+      toast.error('Tugasnya belum masuk. Coba lagi.')
     }
   }
 
@@ -66,7 +66,7 @@ export function ChaptersPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Bab &amp; Tugas</h1>
         <p className="text-sm text-muted-foreground">
-          Centang tugas yang selesai dan ubah status bab sesuai kemajuan penulisan Anda.
+          Centang kalau tugasnya beres. Status bab terserah kamu, sesuai sejauh mana tulisannya jalan.
         </p>
       </header>
 
@@ -100,7 +100,7 @@ export function ChaptersPage() {
                       onValueChange={(value) =>
                         updateChapter.mutate(
                           { chapterId: chapter.id, status: value as ChapterStatus },
-                          { onError: () => toast.error('Gagal mengubah status bab.') },
+                          { onError: () => toast.error('Status bab belum kesimpen.') },
                         )
                       }
                     >

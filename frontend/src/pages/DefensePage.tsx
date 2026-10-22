@@ -53,7 +53,7 @@ export function DefensePage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat bank pertanyaan sidang.</AlertDescription>
+        <AlertDescription>Bank pertanyaan sidangnya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -64,7 +64,8 @@ export function DefensePage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Pertanyaan Sidang</h1>
           <p className="text-sm text-muted-foreground">
-            Siapkan jawaban per pertanyaan penguji; tandai siap bila sudah bisa dijelaskan lancar.
+            Tulis jawaban buat kemungkinan pertanyaan penguji. Tandai siap kalau udah bisa jelasin
+            tanpa baca catatan.
           </p>
         </div>
         <Select value={chapter} onValueChange={setChapter}>
@@ -139,7 +140,7 @@ function AnswerCard({
           toast.success(isReady ? 'Ditandai siap.' : 'Jawaban disimpan.')
           onSaved()
         },
-        onError: () => toast.error('Gagal menyimpan jawaban.'),
+        onError: () => toast.error('Jawabannya belum kesimpen.'),
       },
     )
   }
@@ -161,7 +162,7 @@ function AnswerCard({
           value={value}
           onChange={(e) => onDraft(e.target.value)}
           rows={3}
-          placeholder="Tulis poin jawaban Anda…"
+          placeholder="Tulis poin jawabanmu…"
           aria-label={`Jawaban untuk: ${question.text}`}
         />
         <div className="flex flex-wrap gap-2">
@@ -182,7 +183,7 @@ function AnswerCard({
                 await navigator.clipboard.writeText(question.text)
                 toast.success('Pertanyaan disalin.')
               } catch {
-                toast.error('Gagal menyalin.')
+                toast.error('Nggak bisa nyalin ke clipboard.')
               }
             }}
           >

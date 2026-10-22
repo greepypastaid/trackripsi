@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import { NotebookPen, Send, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -59,7 +59,7 @@ export function JournalPage() {
       setBody('')
       toast.success('Jurnal tersimpan')
     },
-    onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Gagal menyimpan jurnal.'),
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Jurnalnya belum kesimpen.'),
   })
 
   const remove = useMutation({
@@ -70,13 +70,13 @@ export function JournalPage() {
     },
   })
 
-  if (!Number.isFinite(id)) return null
+  if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
   if (error || !research) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Gagal memuat</AlertTitle>
-        <AlertDescription>Riset tidak ditemukan atau Anda tidak berhak mengaksesnya.</AlertDescription>
+        <AlertTitle>Nggak bisa dimuat</AlertTitle>
+        <AlertDescription>Riset ini nggak ada, atau bukan punya akunmu.</AlertDescription>
       </Alert>
     )
   }
@@ -84,7 +84,7 @@ export function JournalPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!body.trim()) {
-      toast.error('Isi catatan dulu.')
+      toast.error('Catatannya masih kosong.')
       return
     }
     create.mutate({ entry_date: date ? format(date, 'yyyy-MM-dd') : '', mood, body: body.trim() })
@@ -95,7 +95,7 @@ export function JournalPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Jurnal Refleksi</h1>
-          <p className="text-sm text-muted-foreground">Catatan harian progres &amp; hambatan {research.title}.</p>
+          <p className="text-sm text-muted-foreground">Catatan harian {research.title}: apa yang jalan, apa yang mandek.</p>
         </div>
         <div className="flex items-center gap-2" aria-label="Filter bulan">
           <Select value={month.slice(0, 4)} onValueChange={(year: string) => setMonth(`${year}-${month.slice(5)}`)}>
@@ -180,7 +180,7 @@ export function JournalPage() {
         {loadingEntries ? (
           <Skeleton className="h-24 w-full" />
         ) : !entries || entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Belum ada entri bulan ini.</p>
+          <p className="text-sm text-muted-foreground">Belum ada entri di bulan ini.</p>
         ) : (
           <ul className="space-y-3">
             {entries.map((entry) => (

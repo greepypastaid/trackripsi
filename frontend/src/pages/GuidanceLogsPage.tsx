@@ -43,7 +43,7 @@ export function GuidanceLogsPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat log bimbingan.</AlertDescription>
+        <AlertDescription>Log bimbingannya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -61,7 +61,7 @@ export function GuidanceLogsPage() {
       setNotes('')
       setItems('')
     } catch {
-      toast.error('Gagal menyimpan log bimbingan.')
+      toast.error('Log bimbingannya belum kesimpen.')
     }
   }
 
@@ -73,8 +73,8 @@ export function GuidanceLogsPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Log Bimbingan</h1>
         <p className="text-sm text-muted-foreground">
-          Catat hasil setiap sesi bimbingan; poin revisi bisa langsung dikonversi menjadi checklist
-          tugas bab.
+          Tulis hasil tiap sesi bimbingan. Poin revisi dari pembimbing bisa langsung jadi tugas
+          di babnya.
         </p>
       </header>
 
@@ -204,7 +204,7 @@ export function GuidanceLogsPage() {
             <EmptyState
               icon={ListChecks}
               title="Belum ada catatan bimbingan"
-              description="Catat hasil setiap sesi bimbingan agar poin revisi tidak terlupakan."
+              description="Abis bimbingan, tulis hasilnya di sini biar poin revisinya nggak kelupaan."
             />
           )}
           <ol className="relative flex flex-col gap-0 border-l pl-5">
@@ -236,14 +236,14 @@ export function GuidanceLogsPage() {
                         className="ml-auto"
                         onClick={() =>
                           convert.mutate(log.id, {
-                            onSuccess: () => toast.success('Poin revisi dikonversi ke checklist bab.'),
-                            onError: () => toast.error('Gagal mengonversi poin revisi.'),
+                            onSuccess: () => toast.success('Poin revisi udah jadi tugas di babnya.'),
+                            onError: () => toast.error('Poin revisinya belum bisa dijadikan tugas.'),
                           })
                         }
                         disabled={convert.isPending}
                       >
                         <ListChecks aria-hidden="true" />
-                        Jadikan checklist
+                        Jadikan tugas
                       </Button>
                     )}
                   </div>

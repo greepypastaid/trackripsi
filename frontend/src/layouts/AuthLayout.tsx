@@ -35,9 +35,9 @@ export function AuthLayout({
             </div>
 
             <div className="mt-auto max-w-xs space-y-2">
-              <p className="text-xs text-white/75">Kamu bisa dengan mudah</p>
+              <p className="text-xs text-white/75">Dari proposal sampai sidang</p>
               <p className="text-2xl leading-snug font-semibold tracking-tight">
-                Kelola skripsi dalam satu tempat yang rapi dan terarah
+                Semua urusan skripsi, satu tempat aja
               </p>
             </div>
           </section>

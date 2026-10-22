@@ -6,16 +6,16 @@ import { useAuth } from '@/hooks/useAuth'
 import { ApiError } from '@/services/api'
 
 const MESSAGES: Record<string, string> = {
-  invalid_state: 'Sesi login Google kedaluwarsa atau tidak valid. Silakan coba lagi.',
-  denied: 'Login Google dibatalkan.',
-  email: 'Email Google tidak tersedia atau belum diverifikasi.',
-  userinfo: 'Google tidak mengembalikan profil akun. Coba lagi.',
+  invalid_state: 'Sesi login Google udah kedaluwarsa. Coba masuk lagi.',
+  denied: 'Login Google dibatalin.',
+  email: 'Email Google-nya nggak ada atau belum diverifikasi.',
+  userinfo: 'Google nggak ngirim data profilmu. Coba lagi.',
   invalid_client: 'Client ID atau Client Secret Google salah (invalid_client).',
-  invalid_grant: 'Kode login Google sudah dipakai atau kedaluwarsa. Coba masuk lagi.',
-  redirect_uri_mismatch: 'Redirect URI di Google Console tidak sama dengan GOOGLE_REDIRECT_URI.',
-  token_exchange: 'Gagal menukar kode login dengan Google.',
-  db: 'Server gagal menyimpan akun (kolom google_id belum ada / migrasi belum jalan).',
-  failed: 'Gagal menghubungi Google. Coba lagi beberapa saat.',
+  invalid_grant: 'Kode loginnya udah dipakai atau kedaluwarsa. Masuk lagi ya.',
+  redirect_uri_mismatch: 'Redirect URI di Google Console beda sama GOOGLE_REDIRECT_URI.',
+  token_exchange: 'Kode loginnya gagal ditukar sama Google.',
+  db: 'Akunmu belum bisa disimpan. Kalau ini server baru, migrasi database-nya kayaknya belum jalan.',
+  failed: 'Google nggak bisa dihubungi. Coba lagi beberapa saat.',
 }
 
 export function GoogleCallbackPage() {
@@ -38,8 +38,8 @@ export function GoogleCallbackPage() {
       .catch((err) =>
         setError(
           err instanceof ApiError && err.status === 401
-            ? 'Token login ditolak server (401). Coba masuk lagi.'
-            : 'Gagal memuat akun Google. Coba masuk lagi.',
+            ? 'Token login ditolak server (401). Masuk lagi ya.'
+            : 'Akun Google-nya nggak bisa dimuat. Masuk lagi ya.',
         ),
       )
   }, [loginWithToken, navigate])

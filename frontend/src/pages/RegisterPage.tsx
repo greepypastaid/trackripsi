@@ -36,7 +36,7 @@ export function RegisterPage() {
       if (err instanceof ApiError) {
         setError(Object.values(err.errors)[0]?.[0] ?? err.message)
       } else {
-        setError('Gagal mendaftar.')
+        setError('Daftarnya belum berhasil. Coba lagi.')
       }
     } finally {
       setBusy(false)
@@ -59,9 +59,7 @@ export function RegisterPage() {
           <BrandLogo className="size-7" />
           <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight">Buat akun</h1>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Akses tugas, catatan, dan proyek skripsimu kapan saja,
-            <br />
-            semuanya tetap di satu tempat.
+            Satu akun buat semua riset skripsimu.
           </p>
         </header>
 
@@ -96,7 +94,7 @@ export function RegisterPage() {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="password" className="text-[0.8125rem] font-semibold">
-              Kata sandi (min. 8 karakter)
+              Kata sandi (minimal 8 karakter)
             </Label>
             <div className="relative">
               <Input

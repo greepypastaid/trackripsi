@@ -67,7 +67,7 @@ export function FocusPage() {
       qc.invalidateQueries({ queryKey: ['focus-sessions', id] })
       toast.success('Sesi fokus tersimpan')
     },
-    onError: () => toast.error('Gagal menyimpan sesi.'),
+    onError: () => toast.error('Sesinya belum kesimpen.'),
   })
 
   const deleteSession = useMutation({
@@ -80,8 +80,8 @@ export function FocusPage() {
   if (error || !research) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Gagal memuat</AlertTitle>
-        <AlertDescription>Riset tidak ditemukan atau Anda tidak berhak mengaksesnya.</AlertDescription>
+        <AlertTitle>Nggak bisa dimuat</AlertTitle>
+        <AlertDescription>Riset ini nggak ada, atau bukan punya akunmu.</AlertDescription>
       </Alert>
     )
   }
@@ -96,7 +96,7 @@ export function FocusPage() {
     setRunning(false)
     const endedAt = new Date()
     if (seconds < 60) {
-      toast.info('Sesi terlalu pendek, tidak disimpan.')
+      toast.info('Di bawah satu menit, sesinya nggak disimpan.')
       setSeconds(0)
       return
     }
@@ -116,7 +116,7 @@ export function FocusPage() {
     <div className="w-full space-y-6">
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Fokus</h1>
-        <p className="text-sm text-muted-foreground">Timer belajar untuk {research.title} — setiap sesi tercatat otomatis.</p>
+        <p className="text-sm text-muted-foreground">Timer nulis buat {research.title}. Tiap sesi langsung kecatat.</p>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -205,7 +205,7 @@ export function FocusPage() {
       <section aria-label="Riwayat sesi fokus" className="space-y-3">
         <h2 className="text-xl font-semibold">Riwayat sesi</h2>
         {payload && payload.sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Belum ada sesi. Mulai timernya di atas.</p>
+          <p className="text-sm text-muted-foreground">Belum ada sesi. Pencet Mulai di atas.</p>
         ) : (
           <ul className="space-y-2">
             {payload?.sessions.map((session) => (

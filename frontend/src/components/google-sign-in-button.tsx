@@ -14,7 +14,7 @@ export function GoogleSignInButton() {
       await startGoogleLogin()
     } catch (err) {
       setBusy(false)
-      toast.error(err instanceof ApiError ? err.message : 'Gagal memulai login Google.')
+      toast.error(err instanceof ApiError ? err.message : 'Login Google-nya nggak bisa dimulai.')
     }
   }
 

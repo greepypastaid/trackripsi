@@ -44,7 +44,7 @@ export function DocumentsPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat berkas draf.</AlertDescription>
+        <AlertDescription>Berkas drafnya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -59,19 +59,19 @@ export function DocumentsPage() {
     setFileError(null)
     if (!file) return
     if (file.size > MAX_BYTES) {
-      setFileError('Berkas melebihi batas 15 MB.')
+      setFileError('Berkasnya kegedean, maksimal 15 MB.')
       return
     }
     if (!/\.(pdf|doc|docx)$/i.test(file.name)) {
-      setFileError('Hanya berkas PDF atau DOC/DOCX yang diizinkan.')
+      setFileError('Formatnya harus PDF atau DOC/DOCX.')
       return
     }
     if (!target) return
     upload.mutate(
       { chapterId: Number(target), file },
       {
-        onSuccess: () => toast.success('Draf berhasil diunggah.'),
-        onError: () => setFileError('Gagal mengunggah. Pastikan format dan ukuran berkas sesuai.'),
+        onSuccess: () => toast.success('Draf udah diunggah.'),
+        onError: () => setFileError('Unggahnya gagal. Cek lagi format dan ukurannya.'),
       },
     )
     if (inputRef.current) inputRef.current.value = ''
@@ -82,7 +82,8 @@ export function DocumentsPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Berkas Draf</h1>
         <p className="text-sm text-muted-foreground">
-          Unggah draf per bab dan lacak seluruh riwayat versi naskah Anda.
+          Simpan draf tiap bab di sini. Tiap upload jadi versi baru, jadi naskah lama masih bisa
+          dibuka.
         </p>
       </header>
 
@@ -162,7 +163,7 @@ export function DocumentsPage() {
             <EmptyState
               icon={Upload}
               title="Belum ada berkas draf"
-              description="Unggah draf bab pertama Anda untuk mulai melacak riwayat versi naskah."
+              description="Unggah draf bab pertamamu. Versi berikutnya otomatis kesimpen sebagai riwayat."
             />
           )}
           {drafts.length > 0 && (

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
@@ -35,6 +35,18 @@ interface CalendarDay {
 }
 
 const WEEKDAYS = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']
+
+const APPOINTMENT_LABEL: Record<string, string> = {
+  planned: 'dijadwalkan',
+  done: 'selesai',
+  cancelled: 'dibatalkan',
+}
+
+const MOOD_LABEL: Record<string, string> = {
+  produktif: 'produktif',
+  biasa: 'biasa saja',
+  struggle: 'kesulitan',
+}
 
 function useCalendar(id: number, month: string) {
   return useQuery({
@@ -118,7 +130,7 @@ export function CalendarPage() {
   const submitAdd = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.date) {
-      toast.error('Pilih tanggal dulu.')
+      toast.error('Tanggalnya belum dipilih.')
       return
     }
     try {
@@ -134,17 +146,17 @@ export function CalendarPage() {
       toast.success('Jadwal bimbingan dibuat.')
       setAddOpen(false)
     } catch {
-      toast.error('Gagal membuat jadwal.')
+      toast.error('Jadwalnya belum jadi. Coba lagi.')
     }
   }
 
-  if (!Number.isFinite(id)) return null
+  if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
   if (error || !research) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Gagal memuat</AlertTitle>
-        <AlertDescription>Riset tidak ditemukan atau Anda tidak berhak mengaksesnya.</AlertDescription>
+        <AlertTitle>Nggak bisa dimuat</AlertTitle>
+        <AlertDescription>Riset ini nggak ada, atau bukan punya akunmu.</AlertDescription>
       </Alert>
     )
   }
@@ -158,7 +170,7 @@ export function CalendarPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Kalender</h1>
-          <p className="text-sm text-muted-foreground">Agenda bulanan {research.title}: tenggat, jadwal, fokus, jurnal.</p>
+          <p className="text-sm text-muted-foreground">Satu bulan sekali lihat: tenggat tugas, jadwal bimbingan, sesi fokus, sama jurnal.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => shiftMonth(-1)} aria-label="Bulan sebelumnya">
@@ -247,7 +259,7 @@ export function CalendarPage() {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {!hasSelection ? (
-              <p className="text-muted-foreground">Tidak ada agenda hari ini.</p>
+              <p className="text-muted-foreground">Nggak ada agenda hari ini.</p>
             ) : (
               <>
                 {selectedData!.focus_minutes ? (
@@ -291,7 +303,10 @@ export function CalendarPage() {
                       <Video aria-hidden="true" className="size-4 shrink-0 text-amber-500" />
                       <span className="truncate">
                         Bimbingan {format(new Date(appointment.scheduled_at), 'HH:mm')}
-                        <span className="text-muted-foreground"> ({appointment.status})</span>
+                        <span className="text-muted-foreground">
+                          {' '}
+                          ({APPOINTMENT_LABEL[appointment.status] ?? appointment.status})
+                        </span>
                       </span>
                     </p>
                     {appointment.status === 'planned' && (
@@ -317,7 +332,7 @@ export function CalendarPage() {
                   <div key={`journal-${entry.id}`} className="flex items-center gap-1.5">
                     <p className="flex min-w-0 flex-1 items-center gap-1.5">
                       <BookOpen aria-hidden="true" className="size-4 shrink-0 text-emerald-500" />
-                      <span className="truncate">Jurnal · mood {entry.mood}</span>
+                      <span className="truncate">Jurnal · suasana {MOOD_LABEL[entry.mood] ?? entry.mood}</span>
                     </p>
                     <Button
                       type="button"
@@ -341,7 +356,7 @@ export function CalendarPage() {
           <DialogHeader>
             <DialogTitle>Tambah jadwal bimbingan</DialogTitle>
             <DialogDescription>
-              Jadwal muncul di kalender; setelah selesai bisa dilengkapi menjadi log bimbingan.
+              Jadwalnya muncul di kalender. Abis selesai, bisa kamu lengkapin jadi log bimbingan.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submitAdd} className="space-y-3">

@@ -26,14 +26,14 @@ export function ReadinessPage() {
   if (error || !readiness) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat status kesiapan sidang.</AlertDescription>
+        <AlertDescription>Status kesiapan sidangnya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
 
   const save = (next: Array<{ label: string; done: boolean }>) => {
     updateChecklist.mutate(next, {
-      onError: () => toast.error('Gagal menyimpan checklist.'),
+      onError: () => toast.error('Checklistnya belum kesimpen.'),
     })
   }
 
@@ -42,7 +42,7 @@ export function ReadinessPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Kesiapan Sidang</h1>
         <p className="text-sm text-muted-foreground">
-          Dihitung langsung dari data riset. Satu-satunya input manual adalah checklist kampus.
+          Skornya dihitung dari data risetmu. Yang perlu kamu isi sendiri cuma checklist kampus.
         </p>
       </header>
 
@@ -51,7 +51,7 @@ export function ReadinessPage() {
           <Card>
             <CardHeader>
               <CardTitle>Skor kesiapan</CardTitle>
-              <CardDescription>Persentase syarat yang sudah terpenuhi.</CardDescription>
+              <CardDescription>Seberapa banyak syarat yang udah beres.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="font-mono text-5xl font-bold" aria-live="polite">
@@ -62,7 +62,7 @@ export function ReadinessPage() {
                 {[
                   ['Bab selesai', `${readiness.stats.chapters_completed}/${readiness.stats.chapters_total}`],
                   ['Sesi bimbingan', `${readiness.stats.supervision_logs}/${readiness.stats.min_supervision_sessions}`],
-                  ['Sumber termasuk', `${readiness.stats.literature_included}/${readiness.stats.literature_total}`],
+                  ['Sumber masuk', `${readiness.stats.literature_included}/${readiness.stats.literature_total}`],
                   ['Poin revisi terbuka', String(readiness.stats.open_action_items)],
                   ['Jadwal mendatang', String(readiness.stats.upcoming_appointments)],
                 ].map(([term, value]) => (
@@ -78,11 +78,11 @@ export function ReadinessPage() {
           <Card>
             <CardHeader>
               <CardTitle>Checklist kampus</CardTitle>
-              <CardDescription>Syarat administratif yang tidak bisa dideteksi sistem.</CardDescription>
+              <CardDescription>Syarat administratif yang nggak kebaca dari data riset.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {checklist.length === 0 && (
-                <p className="text-sm text-muted-foreground">Belum ada butir checklist.</p>
+                <p className="text-sm text-muted-foreground">Belum ada butir. Tambahin syarat dari kampusmu.</p>
               )}
               <ul className="flex flex-col gap-2">
                 {checklist.map((item, index) => (
@@ -144,13 +144,13 @@ export function ReadinessPage() {
               <ShieldCheck aria-hidden="true" className="size-4 text-primary" />
               Yang masih menghalangi ({readiness.blockers.length})
             </CardTitle>
-            <CardDescription>Urut dari prasyarat bab hingga target waktu.</CardDescription>
+            <CardDescription>Diurutin dari prasyarat bab sampai target waktu.</CardDescription>
           </CardHeader>
           <CardContent>
             {readiness.blockers.length === 0 ? (
               <p className="flex items-center gap-2 text-sm text-status-done">
                 <CircleCheck aria-hidden="true" className="size-4" />
-                Semua syarat terpenuhi. Siap mendaftar sidang.
+                Semua syarat beres. Kamu siap daftar sidang.
               </p>
             ) : (
               <ul className="divide-y">
@@ -171,7 +171,7 @@ export function ReadinessPage() {
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Save aria-hidden="true" className="size-3" />
-        Checklist disimpan otomatis setiap perubahan.
+        Checklist kesimpen otomatis tiap kamu ubah.
       </p>
     </div>
   )

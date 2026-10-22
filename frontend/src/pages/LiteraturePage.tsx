@@ -140,7 +140,7 @@ export function LiteraturePage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat matriks literatur.</AlertDescription>
+        <AlertDescription>Matriks literaturnya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -152,7 +152,7 @@ export function LiteraturePage() {
       toast.success('Metadata diambil', { description: entry.title })
       setDoi('')
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Gagal mengambil metadata DOI.')
+      toast.error(err instanceof ApiError ? err.message : 'Metadata DOI-nya nggak bisa diambil.')
     }
   }
 
@@ -166,11 +166,11 @@ export function LiteraturePage() {
           : [],
         year: manual.year ? Number(manual.year) : null,
       })
-      toast.success('Sumber ditambahkan.')
+      toast.success('Sumbernya udah masuk.')
       setManual({ title: '', family: '', given: '', year: '' })
       setManualOpen(false)
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Gagal menambah sumber.')
+      toast.error(err instanceof ApiError ? err.message : 'Sumbernya belum bisa ditambahin.')
     }
   }
 
@@ -185,7 +185,7 @@ export function LiteraturePage() {
     try {
       await saveValues.mutateAsync({ entryId: entry.id, values })
     } catch {
-      toast.error('Gagal menyimpan kolom sintesis.')
+      toast.error('Kolom sintesisnya belum kesimpen.')
     }
   }
 
@@ -198,7 +198,7 @@ export function LiteraturePage() {
       }
       await updateEntry.mutateAsync({ entryId: entry.id, status: next })
     } catch {
-      toast.error('Gagal mengubah status sumber.')
+      toast.error('Status sumbernya belum kesimpen.')
     }
   }
 
@@ -213,7 +213,7 @@ export function LiteraturePage() {
       })
       setExcludeTarget(null)
     } catch {
-      toast.error('Gagal mengubah status sumber.')
+      toast.error('Status sumbernya belum kesimpen.')
     }
   }
 
@@ -232,7 +232,7 @@ export function LiteraturePage() {
       anchor.click()
       URL.revokeObjectURL(url)
     } catch {
-      toast.error('Gagal mengekspor BibTeX.')
+      toast.error('BibTeX-nya gagal diekspor.')
     }
   }
 
@@ -241,7 +241,8 @@ export function LiteraturePage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Matriks Literatur</h1>
         <p className="text-sm text-muted-foreground">
-          Kumpulkan sumber, sintesis per kolom, lalu salin sitasi sesuai gaya yang dipakai kampus.
+          Kumpulin sumbernya, bandingin isinya per kolom, terus ambil sitasinya sesuai gaya yang
+          kamu pakai.
         </p>
       </header>
 
@@ -250,7 +251,7 @@ export function LiteraturePage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Tambah sumber</CardTitle>
-              <CardDescription>Tempel DOI; metadata diambil otomatis dari OpenAlex/Crossref.</CardDescription>
+              <CardDescription>Tempel DOI-nya, metadata diambil otomatis dari OpenAlex atau Crossref.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={onImport} className="flex flex-col gap-3">
@@ -333,7 +334,7 @@ export function LiteraturePage() {
           <Card>
             <CardHeader>
               <CardTitle>Kolom sintesis</CardTitle>
-              <CardDescription>Dipakai sebagai kolom matriks perbandingan.</CardDescription>
+              <CardDescription>Jadi kolom pembanding di matriks.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <ul className="flex flex-wrap gap-2">
@@ -459,7 +460,7 @@ export function LiteraturePage() {
                 <EmptyState
                   icon={Search}
                   title="Belum ada sumber"
-                  description="Mulai dengan impor DOI untuk mengisi metadata otomatis."
+                  description="Tempel DOI di panel kiri, atau tambahin sendiri kalau bukunya cetak."
                 />
               ) : (
                 <div className="overflow-x-auto rounded-lg border">
@@ -614,7 +615,7 @@ export function LiteraturePage() {
             <DialogHeader>
               <DialogTitle>Dikecualikan dari matriks</DialogTitle>
               <DialogDescription>
-                Tulis alasan eksklusi untuk “{excludeTarget?.title}”.
+                Kenapa “{excludeTarget?.title}” dikecualikan? Alasannya ikut kehitung di PRISMA.
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-2">
@@ -662,7 +663,7 @@ function CitationDialog({
       await navigator.clipboard.writeText(text)
       toast.success(`${label} disalin.`)
     } catch {
-      toast.error('Gagal menyalin.')
+      toast.error('Nggak bisa nyalin ke clipboard.')
     }
   }
 

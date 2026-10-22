@@ -69,7 +69,7 @@ export function AppointmentsPage() {
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Gagal memuat jadwal bimbingan.</AlertDescription>
+        <AlertDescription>Jadwal bimbingannya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }
@@ -93,7 +93,7 @@ export function AppointmentsPage() {
       toast.success('Jadwal bimbingan dibuat.')
       setAgenda('')
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Gagal membuat jadwal.')
+      toast.error(err instanceof ApiError ? err.message : 'Jadwalnya belum jadi. Coba lagi.')
     }
   }
 
@@ -115,7 +115,7 @@ export function AppointmentsPage() {
       setCompleting(null)
       setSession({ chapterId: 'none', notes: '', items: '' })
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Gagal menyelesaikan jadwal.')
+      toast.error(err instanceof ApiError ? err.message : 'Jadwalnya belum bisa diselesaikan.')
     }
   }
 
@@ -124,7 +124,8 @@ export function AppointmentsPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Jadwal Bimbingan</h1>
         <p className="text-sm text-muted-foreground">
-          Rencanakan pertemuan, catat agenda, lalu selesaikan untuk mengisi log secara otomatis.
+          Bikin jadwal sama pembimbing, tulis agendanya, terus tandai selesai. Log bimbingannya
+          keisi sendiri.
         </p>
       </header>
 
@@ -267,7 +268,7 @@ export function AppointmentsPage() {
             <EmptyState
               icon={CalendarIcon}
               title="Belum ada jadwal"
-              description="Buat jadwal pertemuan dengan pembimbing di sisi kiri."
+              description="Bikin jadwal pertamamu di panel kiri. Abis selesai, bisa langsung jadi log bimbingan."
             />
           ) : (
             <ul className="flex flex-col gap-3">
@@ -343,7 +344,7 @@ export function AppointmentsPage() {
             <DialogHeader>
               <DialogTitle>Selesaikan sesi bimbingan</DialogTitle>
               <DialogDescription>
-                Satu log bimbingan akan dibuat dan jadwal ditandai selesai.
+                Satu log bimbingan dibuat dari catatan ini, terus jadwalnya ditandai selesai.
               </DialogDescription>
             </DialogHeader>
 

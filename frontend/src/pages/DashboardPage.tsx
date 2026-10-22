@@ -56,13 +56,13 @@ export function DashboardPage() {
         faculty_field: form.field || null,
         target_completion_date: form.target || null,
       })
-      toast.success('Riset dibuat', { description: `${research.title} siap dengan template Bab 1–5.` })
+      toast.success('Riset dibuat', { description: `${research.title} siap dikerjakan.` })
       setForm({ title: '', field: '', target: '' })
       setOpen(false)
       // Langsung bawa pengguna ke riset barunya agar alur tidak terputus.
       navigate(`/researches/${research.id}/overview`)
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Gagal membuat riset.'
+      const message = err instanceof ApiError ? err.message : 'Riset-nya belum jadi. Coba lagi.'
       setError(message)
       toast.error(message)
     }
@@ -73,20 +73,20 @@ export function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Halo, {user?.name.split(' ')[0]}</h1>
-          <p className="text-sm text-muted-foreground">Pantau progres semua riset aktif Anda.</p>
+          <p className="text-sm text-muted-foreground">Ini semua riset yang lagi kamu kerjakan.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus data-icon="inline-start" aria-hidden="true" />
-              Riset Baru
+              Riset baru
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Buat riset baru</DialogTitle>
               <DialogDescription>
-                Sistem otomatis menyiapkan template Bab 1 sampai Bab 5 untuk riset ini.
+                Bab 1 sampai Bab 5 udah disiapin, kamu tinggal isi.
               </DialogDescription>
             </DialogHeader>
             <form id="create-research" onSubmit={submit} className="flex flex-col gap-4">
@@ -167,7 +167,7 @@ export function DashboardPage() {
         <EmptyState
           icon={BookOpen}
           title="Belum ada riset"
-          description="Mulai dengan membuat proyek riset pertama. Sistem akan menyiapkan template Bab 1 sampai Bab 5 otomatis."
+          description="Bikin riset pertamamu. Bab 1 sampai Bab 5 langsung ada, nggak perlu nyiapin apa-apa."
           action={<Button onClick={() => setOpen(true)}>Buat riset pertama</Button>}
         />
       )}

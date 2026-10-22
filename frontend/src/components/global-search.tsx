@@ -96,7 +96,7 @@ export function GlobalSearch() {
           <DialogHeader>
             <DialogTitle className="sr-only">Pencarian global</DialogTitle>
             <DialogDescription className="sr-only">
-              Cari tugas, draf, log bimbingan, dan jurnal di semua riset Anda.
+              Cari tugas, draf, log bimbingan, dan jurnal di semua risetmu.
             </DialogDescription>
           </DialogHeader>
           <input
@@ -109,11 +109,11 @@ export function GlobalSearch() {
           />
           <div aria-live="polite" className="max-h-80 overflow-y-auto">
             {debounced.length < 2 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">Ketik minimal 2 karakter.</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">Ketik minimal 2 huruf.</p>
             ) : isFetching ? (
               <p className="py-4 text-center text-sm text-muted-foreground">Mencari…</p>
             ) : !results || results.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">Tidak ada hasil.</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">Nggak ketemu.</p>
             ) : (
               <ul className="space-y-1">
                 {results.map((result) => (

@@ -94,7 +94,7 @@ class SupervisionLogController extends Controller
             return $chapter->tasks()->count();
         });
 
-        return response()->json(['message' => 'Poin revisi dikonversi ke checklist.', 'task_count' => $created]);
+        return response()->json(['message' => 'Poin revisi udah jadi tugas di babnya.', 'task_count' => $created]);
     }
 
     /** Semua bab wajib milik riset ini; kembalikan id yang sudah tervalidasi. */

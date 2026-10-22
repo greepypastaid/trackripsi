@@ -39,14 +39,14 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
   try {
     response = await fetch(`${BASE_URL}${path}`, { ...options, headers, body })
   } catch {
-    throw new ApiError(0, 'Tidak dapat terhubung ke server. Periksa koneksi Anda.')
+    throw new ApiError(0, 'Nggak bisa nyambung ke server. Cek koneksimu.')
   }
 
   if (response.status === 401) {
     tokenStore.clear()
     const publicPath = location.pathname.startsWith('/login') || location.pathname.startsWith('/auth/google/callback')
     if (!publicPath) location.assign('/login')
-    throw new ApiError(401, 'Sesi berakhir. Silakan masuk kembali.')
+    throw new ApiError(401, 'Sesi kamu habis. Masuk lagi ya.')
   }
 
   if (response.status === 204) return undefined as T
@@ -55,7 +55,7 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
   if (!response.ok) {
     throw new ApiError(
       response.status,
-      payload?.message ?? 'Terjadi kesalahan pada server.',
+      payload?.message ?? 'Servernya lagi bermasalah. Coba lagi sebentar.',
       payload?.errors ?? {},
     )
   }

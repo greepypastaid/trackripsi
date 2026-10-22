@@ -123,7 +123,7 @@ export function AppLayout() {
                   </span>
                   <span className="grid flex-1 text-left leading-tight">
                     <span className="truncate font-semibold">Trackripsi</span>
-                    <span className="truncate text-xs text-muted-foreground">Sahabat Skripsi Kamu! </span>
+                    <span className="truncate text-xs text-muted-foreground">Teman nulis skripsi</span>
                   </span>
                 </Link>
               </SidebarMenuButton>
@@ -154,21 +154,21 @@ export function AppLayout() {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Semua Menu</SidebarGroupLabel>
+            <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarGroupContent>
               {researches.length === 0 ? (
                 /* Belum ada riset sama sekali: satu pintu ke dashboard untuk membuat riset. */
                 <div className="flex flex-col gap-3 px-2 py-1">
                   <p className="text-xs text-muted-foreground">
-                    Belum ada proyek riset. Buat riset pertama untuk membuka bab, tugas, log
-                    bimbingan, dan matriks literatur.
+                    Belum ada riset. Bikin satu dulu, biar bab, tugas, log bimbingan, dan matriks
+                    literatur kebuka.
                   </p>
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={location.pathname === '/dashboard'} tooltip="Buat riset">
                         <NavLink to="/dashboard">
                           <Plus aria-hidden="true" />
-                          Buat riset pertama
+                          Bikin riset
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -177,8 +177,7 @@ export function AppLayout() {
               ) : !Number.isFinite(id) ? (
                 /* Riset ada tapi belum dipilih (berada di dashboard). */
                 <p className="px-2 py-1 text-xs text-muted-foreground">
-                  Pilih riset di atas untuk membuka menu bab, tugas, bimbingan, literatur, dan
-                  kesiapan sidang.
+                  Pilih riset di atas buat buka menunya.
                 </p>
               ) : (
                 /* Riset aktif: menu per kelompok. */
@@ -273,7 +272,7 @@ export function AppLayout() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/dashboard">Beranda</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               {activeNav && Number.isFinite(id) && (

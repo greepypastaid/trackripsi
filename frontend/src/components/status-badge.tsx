@@ -7,7 +7,7 @@ import type { LucideIcon } from 'lucide-react'
    yang otomatis menyesuaikan di dark mode. */
 const CHAPTER_META: Record<ChapterStatus, { label: string; className: string; Icon: LucideIcon }> = {
   not_started: {
-    label: 'Belum Mulai',
+    label: 'Belum mulai',
     className: 'bg-status-todo/10 text-status-todo border-transparent',
     Icon: CircleDashed,
   },

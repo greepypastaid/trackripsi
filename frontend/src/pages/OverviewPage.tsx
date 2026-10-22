@@ -31,8 +31,8 @@ export function OverviewPage() {
   if (error || !research) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Gagal memuat</AlertTitle>
-        <AlertDescription>Riset tidak ditemukan atau Anda tidak berhak mengaksesnya.</AlertDescription>
+        <AlertTitle>Nggak bisa dimuat</AlertTitle>
+        <AlertDescription>Riset ini nggak ada, atau bukan punya akunmu.</AlertDescription>
       </Alert>
     )
   }
@@ -61,7 +61,7 @@ export function OverviewPage() {
           <Button asChild variant="outline" size="sm">
             <Link to={`/researches/${id}/chapters`}>
               <ListTodo aria-hidden="true" />
-              Kelola bab &amp; tugas
+              Atur bab &amp; tugas
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
@@ -82,11 +82,11 @@ export function OverviewPage() {
             onClick={async () => {
               const { apiRaw } = await import('@/services/download')
               await apiRaw(`/researches/${id}/export`, `rekap-riset-${id}.md`)
-              toast.success('Rekap Markdown diunduh')
+              toast.success('Rekap udah diunduh')
             }}
           >
             <FileDown aria-hidden="true" />
-            Export rekap
+            Unduh rekap
           </Button>
         </nav>
       </header>
@@ -168,17 +168,17 @@ export function OverviewPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-status-done">Semua syarat terpenuhi.</p>
+              <p className="text-sm text-status-done">Semua syarat udah beres.</p>
             )}
             <div className="flex flex-wrap gap-2 text-xs">
-              <Badge variant="outline">{readiness.stats.literature_included} sumber termasuk</Badge>
+              <Badge variant="outline">{readiness.stats.literature_included} sumber masuk</Badge>
               <Badge variant="outline">
                 {readiness.stats.supervision_logs}/{readiness.stats.min_supervision_sessions} sesi
               </Badge>
               <Badge variant="outline">{readiness.stats.upcoming_appointments} jadwal mendatang</Badge>
             </div>
             <Button asChild variant="ghost" size="sm">
-              <Link to={`/researches/${id}/logbook/print`}>Cetak logbook bimbingan</Link>
+              <Link to={`/researches/${id}/logbook/print`}>Cetak log bimbingan</Link>
             </Button>
           </CardContent>
         </Card>
@@ -189,13 +189,13 @@ export function OverviewPage() {
         <Card size="sm">
           <CardContent>
             <p className="mb-3 text-xs text-muted-foreground">
-              Terisi otomatis: selesaikan tugas, unggah draf, catat bimbingan, atau tandai jadwal selesai.
+              Isinya otomatis: tiap kali kamu selesaikan tugas, upload draf, catat bimbingan, atau tandai jadwal selesai.
             </p>
             {timeline === undefined ? (
               <Skeleton className="h-24 w-full" />
             ) : timeline.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Belum ada aktivitas. Selesaikan tugas atau unggah draf untuk mulai mencatat riwayat.
+                Belum ada jejak. Selesaikan satu tugas atau upload draf, nanti riwayatnya muncul di sini.
               </p>
             ) : (
               <ol className="space-y-3">

@@ -8,7 +8,7 @@ export async function apiRaw(path: string, fileName: string): Promise<void> {
   const response = await fetch(`${BASE_URL}${path.replace(/^\/api\/v1/, '')}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
-  if (!response.ok) throw new Error('Gagal mengunduh berkas.')
+  if (!response.ok) throw new Error('Berkasnya nggak bisa diunduh.')
   const url = URL.createObjectURL(await response.blob())
   const link = document.createElement('a')
   link.href = url

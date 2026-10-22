@@ -30,7 +30,7 @@ export function LoginPage() {
       await login(email, password)
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      setError(err instanceof ApiError ? (err.errors.email?.[0] ?? err.message) : 'Gagal masuk.')
+      setError(err instanceof ApiError ? (err.errors.email?.[0] ?? err.message) : 'Belum bisa masuk nih. Coba lagi.')
     } finally {
       setBusy(false)
     }
@@ -42,7 +42,7 @@ export function LoginPage() {
         <>
           Belum punya akun?{' '}
           <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
-            Daftar
+            Bikin akun
           </Link>
         </>
       }
@@ -52,9 +52,7 @@ export function LoginPage() {
           <BrandLogo className="size-7" />
           <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight">Masuk ke akunmu</h1>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Lanjutkan progres skripsi dari titik terakhir,
-            <br />
-            kapan pun kamu butuh.
+            Lanjut lagi dari bagian yang kemarin kamu tinggalkan.
           </p>
         </header>
 

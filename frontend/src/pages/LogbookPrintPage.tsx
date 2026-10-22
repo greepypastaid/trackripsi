@@ -24,7 +24,7 @@ export function LogbookPrintPage() {
   if (error || !data) {
     return (
       <Alert variant="destructive" className="m-8">
-        <AlertDescription>Gagal memuat logbook.</AlertDescription>
+        <AlertDescription>Logbooknya nggak bisa dimuat.</AlertDescription>
       </Alert>
     )
   }

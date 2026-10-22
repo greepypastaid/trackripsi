@@ -15,9 +15,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { hasError
     if (this.state.hasError) {
       return (
         <div role="alert" className="rounded-lg border border-rose-300 bg-rose-50 p-6 text-sm text-rose-800">
-          <p className="font-semibold">Terjadi kesalahan pada tampilan.</p>
+          <p className="font-semibold">Bagian ini gagal ditampilin.</p>
           <button type="button" onClick={() => this.setState({ hasError: false })} className="mt-2 underline">
-            Coba muat ulang bagian ini
+            Muat ulang bagian ini
           </button>
         </div>
       )
