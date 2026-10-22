@@ -46,6 +46,17 @@ export function useUpdateResearch() {
   })
 }
 
+export function useDeleteResearch() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => api(`/researches/${id}`, { method: 'DELETE' }),
+    onSuccess: (_data, id) => {
+      qc.removeQueries({ queryKey: ['research', id] })
+      qc.invalidateQueries({ queryKey: ['researches'] })
+    },
+  })
+}
+
 export function useToggleTask(researchId: number) {
   const qc = useQueryClient()
   return useMutation({

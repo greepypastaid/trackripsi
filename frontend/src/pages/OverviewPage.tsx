@@ -1,6 +1,19 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { format, isValid } from 'date-fns'
-import { CalendarClock, CheckCircle2, FileDown, ListTodo, NotebookPen, ShieldCheck, Target, Upload } from 'lucide-react'
+import {
+  CalendarClock,
+  CheckCircle2,
+  FileDown,
+  ListTodo,
+  MoreHorizontal,
+  NotebookPen,
+  Pencil,
+  ShieldCheck,
+  Target,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { useResearch, useTimeline } from '@/services/researches'
 import { useReadiness } from '@/services/literature'
@@ -11,6 +24,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { DeleteResearchDialog, ResearchFormDialog } from '@/components/research-dialogs'
 
 const EVENT_META = {
   task_completed: { label: 'Tugas selesai', Icon: CheckCircle2, className: 'text-status-done' },
@@ -25,6 +45,9 @@ export function OverviewPage() {
   const { data: research, isLoading, error } = useResearch(id)
   const { data: timeline } = useTimeline(id)
   const { data: readiness } = useReadiness(id)
+  const navigate = useNavigate()
+  const [formOpen, setFormOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   if (!Number.isFinite(id)) return <Navigate to="/dashboard" replace />
   if (isLoading) return <Skeleton className="h-64 w-full" />
@@ -88,6 +111,24 @@ export function OverviewPage() {
             <FileDown aria-hidden="true" />
             Unduh rekap
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreHorizontal aria-hidden="true" />
+                Kelola
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setFormOpen(true)}>
+                <Pencil aria-hidden="true" />
+                Edit riset
+              </DropdownMenuItem>
+              <DropdownMenuItem variant="destructive" onSelect={() => setDeleteOpen(true)}>
+                <Trash2 aria-hidden="true" />
+                Hapus riset
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
       </header>
 
@@ -247,6 +288,13 @@ export function OverviewPage() {
           ))}
         </ul>
       </section>
+
+      <ResearchFormDialog open={formOpen} onOpenChange={setFormOpen} research={research} />
+      <DeleteResearchDialog
+        research={deleteOpen ? research : null}
+        onOpenChange={(open) => !open && setDeleteOpen(false)}
+        onDeleted={() => navigate('/dashboard')}
+      />
     </div>
   )
 }

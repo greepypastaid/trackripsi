@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
-import { BookOpen, CalendarClock, Plus } from 'lucide-react'
-import { toast } from 'sonner'
+import { Link } from 'react-router-dom'
+import { BookOpen, CalendarClock, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { DatePicker } from '@/components/date-picker'
-import { useCreateResearch, useResearches } from '@/services/researches'
+import { useResearches } from '@/services/researches'
 import { useAppointments } from '@/services/literature'
 import { ResearchStatusBadge } from '@/components/status-badge'
 import { EmptyState } from '@/components/empty-state'
+import { DeleteResearchDialog, ResearchFormDialog } from '@/components/research-dialogs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,53 +17,34 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ApiError } from '@/services/api'
 import type { Research } from '@/services/types'
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const { data: researches, isLoading } = useResearches()
-  const createResearch = useCreateResearch()
-  const [open, setOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [form, setForm] = useState({ title: '', field: '', target: '' })
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<Research | null>(null)
+  const [deleting, setDeleting] = useState<Research | null>(null)
 
   // Jadwal mendatang lintas riset: satu query per riset (maks 5 teratas).
   const activeId = researches?.[0]?.id
   const { data: appointmentData } = useAppointments(activeId ?? Number.NaN)
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    try {
-      const research = await createResearch.mutateAsync({
-        title: form.title,
-        faculty_field: form.field || null,
-        target_completion_date: form.target || null,
-      })
-      toast.success('Riset dibuat', { description: `${research.title} siap dikerjakan.` })
-      setForm({ title: '', field: '', target: '' })
-      setOpen(false)
-      // Langsung bawa pengguna ke riset barunya agar alur tidak terputus.
-      navigate(`/researches/${research.id}/overview`)
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Riset-nya belum jadi. Coba lagi.'
-      setError(message)
-      toast.error(message)
-    }
+  const openCreate = () => {
+    setEditing(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (research: Research) => {
+    setEditing(research)
+    setFormOpen(true)
   }
 
   return (
@@ -75,61 +54,10 @@ export function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight">Halo, {user?.name.split(' ')[0]}</h1>
           <p className="text-sm text-muted-foreground">Ini semua riset yang lagi kamu kerjakan.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus data-icon="inline-start" aria-hidden="true" />
-              Riset baru
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Buat riset baru</DialogTitle>
-              <DialogDescription>
-                Bab 1 sampai Bab 5 udah disiapin, kamu tinggal isi.
-              </DialogDescription>
-            </DialogHeader>
-            <form id="create-research" onSubmit={submit} className="flex flex-col gap-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="title">Judul skripsi</Label>
-                <Input
-                  id="title"
-                  required
-                  maxLength={500}
-                  value={form.title}
-                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="field">Bidang studi (opsional)</Label>
-                <Input
-                  id="field"
-                  maxLength={255}
-                  value={form.field}
-                  onChange={(e) => setForm((prev) => ({ ...prev, field: e.target.value }))}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="target">Target selesai (opsional)</Label>
-                <DatePicker
-                  value={form.target ? new Date(`${form.target}T00:00:00`) : undefined}
-                  onChange={(value) => setForm((prev) => ({ ...prev, target: value ? format(value, 'yyyy-MM-dd') : '' }))}
-                  ariaLabel="Target selesai"
-                />
-              </div>
-            </form>
-            <DialogFooter>
-              <Button type="submit" form="create-research" disabled={createResearch.isPending}>
-                {createResearch.isPending ? 'Menyimpan…' : 'Simpan riset'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={openCreate}>
+          <Plus data-icon="inline-start" aria-hidden="true" />
+          Riset baru
+        </Button>
       </header>
 
       {appointmentData?.meta.next && researches?.[0] && (
@@ -168,36 +96,76 @@ export function DashboardPage() {
           icon={BookOpen}
           title="Belum ada riset"
           description="Bikin riset pertamamu. Bab 1 sampai Bab 5 langsung ada, nggak perlu nyiapin apa-apa."
-          action={<Button onClick={() => setOpen(true)}>Buat riset pertama</Button>}
+          action={<Button onClick={openCreate}>Buat riset pertama</Button>}
         />
       )}
 
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {researches?.map((research: Research) => (
           <li key={research.id}>
-            <Link to={`/researches/${research.id}/overview`} className="group block rounded-xl outline-none">
-              <Card className="h-full justify-between transition-all group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-ring">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="leading-snug">{research.title}</CardTitle>
+            {/* Tautan dibentangkan lewat after:inset-0 supaya satu kartu bisa diklik,
+                tanpa menyarangkan tombol aksi di dalam elemen <a>. */}
+            <Card className="relative h-full justify-between transition-all focus-within:ring-2 focus-within:ring-ring hover:ring-primary">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="leading-snug">
+                    <Link
+                      to={`/researches/${research.id}/overview`}
+                      className="after:absolute after:inset-0 after:content-[''] hover:underline"
+                    >
+                      {research.title}
+                    </Link>
+                  </CardTitle>
+                  <div className="relative z-10 flex shrink-0 items-center gap-1">
                     <ResearchStatusBadge status={research.status} />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Aksi riset ${research.title}`}
+                        >
+                          <MoreHorizontal aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => openEdit(research)}>
+                          <Pencil aria-hidden="true" />
+                          Edit riset
+                        </DropdownMenuItem>
+                        <DropdownMenuItem variant="destructive" onSelect={() => setDeleting(research)}>
+                          <Trash2 aria-hidden="true" />
+                          Hapus riset
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <CardDescription>
-                    {research.faculty_field ?? 'Bidang belum diisi'}
-                    {research.target_completion_date ? ` · target ${research.target_completion_date}` : ''}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-1.5">
-                  <p className="font-mono text-sm" aria-live="polite">
-                    {research.progress_percent ?? 0}% selesai
-                  </p>
-                  <Progress value={research.progress_percent ?? 0} aria-label={`Progres ${research.title}`} />
-                </CardContent>
-              </Card>
-            </Link>
+                </div>
+                <CardDescription>
+                  {research.faculty_field ?? 'Bidang belum diisi'}
+                  {research.target_completion_date ? ` · target ${research.target_completion_date}` : ''}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-1.5">
+                <p className="font-mono text-sm" aria-live="polite">
+                  {research.progress_percent ?? 0}% selesai
+                </p>
+                <Progress value={research.progress_percent ?? 0} aria-label={`Progres ${research.title}`} />
+              </CardContent>
+            </Card>
           </li>
         ))}
       </ul>
+
+      <ResearchFormDialog
+        open={formOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open)
+          if (!open) setEditing(null)
+        }}
+        research={editing}
+      />
+      <DeleteResearchDialog research={deleting} onOpenChange={(open) => !open && setDeleting(null)} />
     </div>
   )
 }

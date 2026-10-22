@@ -70,7 +70,12 @@ class ResearchController extends Controller
     {
         $this->authorize('delete', $research);
 
-        DB::transaction(fn () => $research->delete());
+        DB::transaction(function () use ($research) {
+            // Draf dihapus lewat model agar berkas di disk ikut hilang; relasi lain
+            // sudah pakai ON DELETE CASCADE di database.
+            $research->documents()->get()->each->delete();
+            $research->delete();
+        });
 
         return response()->json(['message' => 'Riset dihapus.']);
     }
