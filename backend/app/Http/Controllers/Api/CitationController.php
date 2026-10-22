@@ -19,10 +19,15 @@ class CitationController extends Controller
 
         $style = $this->style($request->query('style'), $research->citation_style);
         $data = $this->toArray($entry);
+        $number = $style === 'ieee' ? $this->ieeeNumber($research->id, $entry->id) : null;
 
         return response()->json(['data' => [
             'style' => $style,
-            'in_text' => CitationFormatter::inText($data, $style),
+            'number' => $number,
+            // Nomor di atas cuma perkiraan kalau sumbernya belum "Termasuk":
+            // belum ada di daftar pustaka, jadi UI perlu bilang begitu.
+            'included' => $entry->status === 'included',
+            'in_text' => CitationFormatter::inText($data, $style, $number),
             'reference' => CitationFormatter::reference($data, $style),
         ]]);
     }
@@ -39,9 +44,14 @@ class CitationController extends Controller
                 'id' => $entry->id,
                 'sort' => ($entry->authors[0]['family'] ?? 'zzz').($entry->year ?? 0),
                 'reference' => CitationFormatter::reference($this->toArray($entry), $style),
-            ])
-            ->sortBy('sort')
-            ->values();
+            ]);
+
+        // IEEE: urut sesuai urutan sumber dimasukkan, lalu diberi nomor 1..n
+        // yang sama persis dengan yang dipakai `citation()`.
+        $entries = $style === 'ieee'
+            ? $entries->sortBy('id')->values()
+                ->map(fn (array $item, int $index) => [...$item, 'number' => $index + 1])
+            : $entries->sortBy('sort')->values()->map(fn (array $item) => [...$item, 'number' => null]);
 
         return response()->json(['data' => [
             'style' => $style,
@@ -49,10 +59,34 @@ class CitationController extends Controller
             // `reference` sudah di-escape server; penanda *...* untuk italic.
             'items' => $entries->map(fn (array $item) => [
                 'id' => $item['id'],
+                'number' => $item['number'],
                 'reference' => $item['reference'],
             ])->all(),
-            'text' => $entries->map(fn (array $item) => preg_replace('/\*(.+?)\*/', '$1', $item['reference']))->implode("\n"),
+            'text' => $entries->map(fn (array $item) => (
+                $item['number'] !== null ? "[{$item['number']}] " : ''
+            ).preg_replace('/\*(.+?)\*/', '$1', $item['reference']))->implode("\n"),
         ]]);
+    }
+
+    /**
+     * Nomor sitasi IEEE = posisi sumber di daftar pustaka (hanya yang "Termasuk"),
+     * dihitung dari urutan id. Sumber yang belum masuk tetap dapat nomor prediktif
+     * supaya dialog sitasi nggak menampilkan [1] palsu.
+     */
+    private function ieeeNumber(int $researchId, int $entryId): int
+    {
+        $ids = LiteratureEntry::where('research_id', $researchId)
+            ->where('status', 'included')
+            ->orderBy('id')
+            ->pluck('id');
+
+        $position = $ids->search($entryId);
+
+        if ($position !== false) {
+            return $position + 1;
+        }
+
+        return $ids->filter(fn (int $id) => $id < $entryId)->count() + 1;
     }
 
     public function bibtex(Request $request, int $researchId)

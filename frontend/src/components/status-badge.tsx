@@ -30,9 +30,22 @@ const CHAPTER_META: Record<ChapterStatus, { label: string; className: string; Ic
 
 const RESEARCH_META: Record<ResearchStatus, { label: string; className: string }> = {
   active: { label: 'Aktif', className: 'bg-status-done/10 text-status-done border-transparent' },
+  paused: {
+    label: 'Ditunda',
+    className: 'bg-status-revision/10 text-status-revision border-transparent',
+  },
+  inactive: {
+    label: 'Tidak aktif',
+    className: 'bg-status-todo/10 text-status-todo border-transparent',
+  },
   completed: { label: 'Selesai', className: 'bg-primary/10 text-primary border-transparent' },
-  archived: { label: 'Arsip', className: 'bg-status-todo/10 text-status-todo border-transparent' },
+  archived: { label: 'Arsip', className: 'bg-muted text-muted-foreground border-transparent' },
 }
+
+/** Label status riset, dipakai badge dan menu ubah status. */
+export const RESEARCH_STATUS_LABEL: Record<ResearchStatus, string> = Object.fromEntries(
+  Object.entries(RESEARCH_META).map(([key, meta]) => [key, meta.label]),
+) as Record<ResearchStatus, string>
 
 export function ChapterStatusBadge({ status }: { status: ChapterStatus }) {
   const { label, className, Icon } = CHAPTER_META[status]

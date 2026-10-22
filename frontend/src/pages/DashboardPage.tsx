@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useResearches } from '@/services/researches'
 import { useAppointments } from '@/services/literature'
 import { ResearchStatusBadge } from '@/components/status-badge'
+import { ResearchStatusMenuItems } from '@/components/research-status-menu'
 import { EmptyState } from '@/components/empty-state'
 import { DeleteResearchDialog, ResearchFormDialog } from '@/components/research-dialogs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -137,6 +138,7 @@ export function DashboardPage() {
                           <Trash2 aria-hidden="true" />
                           Hapus riset
                         </DropdownMenuItem>
+                        <ResearchStatusMenuItems research={research} />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

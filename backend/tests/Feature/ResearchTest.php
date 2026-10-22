@@ -71,6 +71,27 @@ it('updates a research owned by the user', function () {
     expect($research->refresh()->title)->toBe('Judul Baru');
 });
 
+it('changes research status to paused or inactive', function () {
+    $owner = User::factory()->create();
+    $research = Research::factory()->for($owner)->create();
+
+    Sanctum::actingAs($owner);
+
+    foreach (['paused', 'inactive', 'active'] as $status) {
+        $this->patchJson("/api/v1/researches/{$research->id}", ['status' => $status])
+            ->assertOk()
+            ->assertJsonPath('data.status', $status);
+
+        expect($research->refresh()->status)->toBe($status);
+    }
+
+    $this->patchJson("/api/v1/researches/{$research->id}", ['status' => 'ditunda'])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('status');
+
+    expect($research->refresh()->status)->toBe('active');
+});
+
 it('blocks user B from updating user A research', function () {
     $research = Research::factory()->for(User::factory()->create())->create();
 

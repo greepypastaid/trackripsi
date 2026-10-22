@@ -941,8 +941,15 @@ export function LiteraturePage() {
                   {bibliography?.items.length ? (
                     <ol className="space-y-3 text-sm">
                       {bibliography.items.map((item) => (
-                        <li key={item.id}>
-                          <FormattedReference text={item.reference} />
+                        <li key={item.id} className="flex gap-2">
+                          {item.number !== null && (
+                            <span className="w-8 shrink-0 text-right font-mono text-xs text-muted-foreground tabular-nums">
+                              [{item.number}]
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <FormattedReference text={item.reference} />
+                          </span>
                         </li>
                       ))}
                     </ol>
@@ -1091,14 +1098,37 @@ function CitationDialog({
                   Salin
                 </Button>
               </div>
+              {!data.included && (
+                <p className="text-xs text-muted-foreground">
+                  {data.number !== null
+                    ? 'Sumber ini belum berstatus “Termasuk”, jadi belum masuk daftar pustaka. Nomornya masih bisa berubah.'
+                    : 'Sumber ini belum berstatus “Termasuk”, jadi belum masuk daftar pustaka.'}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Daftar pustaka</Label>
               <div className="flex items-start gap-2">
                 <p className="flex-1 rounded-md border bg-muted px-3 py-2 text-sm">
-                  {data.reference}
+                  {data.number !== null && (
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                      [{data.number}]{' '}
+                    </span>
+                  )}
+                  <FormattedReference text={data.reference} />
                 </p>
-                <Button size="sm" variant="outline" onClick={() => copy(data.reference, 'Referensi')}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    copy(
+                      // Penanda *italic* cuma buat render; jangan ikut tersalin.
+                      (data.number !== null ? `[${data.number}] ` : '') +
+                        data.reference.replace(/\*/g, ''),
+                      'Referensi',
+                    )
+                  }
+                >
                   Salin
                 </Button>
               </div>

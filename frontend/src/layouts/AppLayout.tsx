@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import {
   Sidebar,
   SidebarContent,
@@ -109,6 +109,7 @@ export function AppLayout() {
     .join('')
 
   const activeNav = NAV.find(({ to }) => location.pathname.endsWith(to))
+  const activeResearch = researches.find((r) => r.id === id)
 
   return (
     <SidebarProvider>
@@ -138,8 +139,16 @@ export function AppLayout() {
               value={Number.isFinite(id) ? String(id) : undefined}
               onValueChange={(value) => navigate(`/researches/${value}/overview`)}
             >
-              <SelectTrigger id="research-switcher" className="w-full">
-                <SelectValue placeholder={researches.length ? 'Pilih riset…' : 'Belum ada riset'} />
+              {/* Judul riset panjang: di desktop tombolnya dinaikkan supaya
+                  judul kebaca dua baris, nggak dipotong jadi satu baris. */}
+              <SelectTrigger
+                id="research-switcher"
+                className="w-full md:data-[size=default]:h-auto md:min-h-12 md:items-start md:py-2.5 md:whitespace-normal"
+              >
+                <span className="line-clamp-1 text-left md:line-clamp-2">
+                  {activeResearch?.title ??
+                    (researches.length ? 'Pilih riset…' : 'Belum ada riset')}
+                </span>
               </SelectTrigger>
               <SelectContent>
                 {researches.map((r) => (

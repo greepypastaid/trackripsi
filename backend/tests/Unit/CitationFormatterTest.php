@@ -37,6 +37,7 @@ it('formats in-text citations per style', function () {
     expect(CitationFormatter::inText($data, 'apa7'))->toBe('(Susmiatin et al., 2025)');
     expect(CitationFormatter::inText(entry(['authors' => [$data['authors'][0]]]), 'apa7'))
         ->toBe('(Susmiatin, 2025)');
+    expect(CitationFormatter::inText($data, 'ieee', 12))->toBe('[12]');
     expect(CitationFormatter::inText($data, 'ieee'))->toBe('[1]');
 });
 

@@ -5,8 +5,8 @@ namespace App\Support;
 /**
  * Formatter sitasi. Pure function tanpa dependency eksternal.
  *
- * ponytail: IEEE diurutkan alfabetis (bukan urutan sitasi) karena nomor sitasi
- * butuh state seluruh naskah; pindah ke urutan sitasi bila user minta nomor manual.
+ * IEEE butuh nomor pustaka yang cuma diketahui pemanggil (urutan daftar pustaka),
+ * jadi nomornya dikirim sebagai argumen — jangan ditebak di sini.
  */
 class CitationFormatter
 {
@@ -36,12 +36,12 @@ class CitationFormatter
         return $entry;
     }
 
-    public static function inText(array $entry, string $style): string
+    public static function inText(array $entry, string $style, ?int $number = null): string
     {
-        return self::inTextRaw(self::sanitize($entry), $style);
+        return self::inTextRaw(self::sanitize($entry), $style, $number);
     }
 
-    private static function inTextRaw(array $entry, string $style): string
+    private static function inTextRaw(array $entry, string $style, ?int $number = null): string
     {
         $authors = $entry['authors'] ?? [];
         $year = $entry['year'] ?? 'n.d.';
@@ -49,7 +49,9 @@ class CitationFormatter
         $count = count($authors);
 
         return match ($style) {
-            'ieee' => '[1]',
+            // Nomor wajib dari pemanggil; angka 1 di sini cuma jaring pengaman
+            // supaya nggak ada sitasi IEEE yang tampil sebagai "[1]" padahal bukan.
+            'ieee' => '['.($number ?? 1).']',
             'chicago_author_date' => match (true) {
                 $count === 1 => "{$first} {$year}",
                 $count <= 3 => self::joinFamilies($authors, self::LIST_SEP, self::AND_SEP)." {$year}",

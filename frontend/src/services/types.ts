@@ -1,5 +1,5 @@
 export type ChapterStatus = 'not_started' | 'in_progress' | 'revision' | 'completed'
-export type ResearchStatus = 'active' | 'completed' | 'archived'
+export type ResearchStatus = 'active' | 'paused' | 'inactive' | 'completed' | 'archived'
 
 export interface User {
   id: number
@@ -189,6 +189,10 @@ export interface Logbook {
 
 export interface Citation {
   style: CitationStyle
+  /** Nomor pustaka; hanya terisi untuk gaya IEEE. */
+  number: number | null
+  /** False = belum masuk daftar pustaka, jadi nomornya masih perkiraan. */
+  included: boolean
   in_text: string
   reference: string
 }
@@ -196,6 +200,6 @@ export interface Citation {
 export interface Bibliography {
   style: CitationStyle
   count: number
-  items: Array<{ id: number; reference: string }>
+  items: Array<{ id: number; number: number | null; reference: string }>
   text: string
 }

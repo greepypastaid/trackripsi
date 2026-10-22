@@ -219,6 +219,74 @@ it('exposes the default citation style on research and respects the style query'
         ->assertJsonPath('data.in_text', '[1]');
 });
 
+it('numbers ieee citations to match the bibliography order', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user);
+    $research = Research::factory()->for($user)->create();
+
+    // Urutan dimasukkan: Zebra, Alpha, Mango. IEEE mengikuti urutan ini,
+    // bukan alfabetis, dan nomornya harus sama dengan daftar pustaka.
+    $titles = ['Zebra', 'Alpha', 'Mango'];
+    $ids = [];
+    foreach ($titles as $index => $title) {
+        $ids[$title] = LiteratureEntry::create([
+            'research_id' => $research->id,
+            'title' => $title,
+            'authors' => [['family' => $title, 'given' => 'A']],
+            'year' => 2020 + $index,
+            'status' => 'included',
+        ])->id;
+    }
+
+    LiteratureEntry::create([
+        'research_id' => $research->id,
+        'title' => 'Dikecualikan',
+        'authors' => [['family' => 'Buang', 'given' => 'B']],
+        'year' => 2019,
+        'status' => 'excluded',
+        'exclusion_reason' => 'Tidak relevan',
+    ]);
+
+    $bibliography = $this->getJson("/api/v1/researches/{$research->id}/literature/bibliography?style=ieee")
+        ->assertOk()
+        ->json('data');
+
+    expect(array_column($bibliography['items'], 'number'))->toBe([1, 2, 3]);
+    expect(array_column($bibliography['items'], 'id'))->toBe([
+        $ids['Zebra'], $ids['Alpha'], $ids['Mango'],
+    ]);
+    expect($bibliography['text'])->toStartWith('[1] Zebra');
+
+    foreach (['Zebra' => 1, 'Alpha' => 2, 'Mango' => 3] as $title => $number) {
+        $this->getJson("/api/v1/researches/{$research->id}/literature/{$ids[$title]}/citation?style=ieee")
+            ->assertOk()
+            ->assertJsonPath('data.number', $number)
+            ->assertJsonPath('data.included', true)
+            ->assertJsonPath('data.in_text', "[{$number}]");
+    }
+
+    // Gaya lain nggak pakai nomor: nomornya harus null dan sitasinya penulis-tahun.
+    $apa = $this->getJson("/api/v1/researches/{$research->id}/literature/{$ids['Alpha']}/citation?style=apa7")
+        ->assertOk()
+        ->json('data');
+    expect($apa['number'])->toBeNull();
+    expect($apa['in_text'])->toBe('(Alpha, 2021)');
+
+    // Sumber yang belum "Termasuk" tetap dapat nomor perkiraan, tapi ditandai
+    // belum masuk daftar pustaka biar UI bisa memperingatkan.
+    $candidate = LiteratureEntry::create([
+        'research_id' => $research->id,
+        'title' => 'Masih Kandidat',
+        'authors' => [['family' => 'Kandidat', 'given' => 'K']],
+        'year' => 2024,
+    ]);
+
+    $this->getJson("/api/v1/researches/{$research->id}/literature/{$candidate->id}/citation?style=ieee")
+        ->assertOk()
+        ->assertJsonPath('data.included', false)
+        ->assertJsonPath('data.number', 4);
+});
+
 it('escapes html from third-party metadata in bibliography output', function () {
     $user = User::factory()->create();
     Sanctum::actingAs($user);

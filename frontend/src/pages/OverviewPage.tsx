@@ -17,7 +17,8 @@ import {
 import { toast } from 'sonner'
 import { useResearch, useTimeline } from '@/services/researches'
 import { useReadiness } from '@/services/literature'
-import { ChapterStatusBadge } from '@/components/status-badge'
+import { ChapterStatusBadge, ResearchStatusBadge } from '@/components/status-badge'
+import { ResearchStatusMenuItems } from '@/components/research-status-menu'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,7 +75,10 @@ export function OverviewPage() {
     <div className="w-full space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">{research.title}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">{research.title}</h1>
+            <ResearchStatusBadge status={research.status} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {research.faculty_field ?? 'Bidang belum diisi'}
             {research.supervisor_name ? ` · Pembimbing: ${research.supervisor_name}` : ''}
@@ -127,6 +131,7 @@ export function OverviewPage() {
                 <Trash2 aria-hidden="true" />
                 Hapus riset
               </DropdownMenuItem>
+              <ResearchStatusMenuItems research={research} />
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>
