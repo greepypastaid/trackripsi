@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   CalendarClock,
@@ -92,6 +93,7 @@ export function AppLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const qc = useQueryClient()
+  const [switcherOpen, setSwitcherOpen] = useState(false)
   const { data: researches = [] } = useResearches()
   const id = Number(researchId)
   const { data: research } = useResearch(id)
@@ -132,25 +134,34 @@ export function AppLayout() {
           </SidebarMenu>
 
           <div className="flex flex-col gap-1.5 px-2 pt-1 pb-2">
-            <label htmlFor="research-switcher" className="text-xs font-medium text-muted-foreground">
+            {/* Label ikut membuka menu: orang sering klik teksnya, bukan kotaknya.
+                Radix Select yang dikontrol `open` bikin itu mungkin. */}
+            <label
+              htmlFor="research-switcher"
+              className="cursor-pointer text-xs font-medium text-muted-foreground"
+              onClick={() => setSwitcherOpen(true)}
+            >
               Riset aktif
             </label>
             <Select
+              open={switcherOpen}
+              onOpenChange={setSwitcherOpen}
               value={Number.isFinite(id) ? String(id) : undefined}
               onValueChange={(value) => navigate(`/researches/${value}/overview`)}
+              disabled={researches.length === 0}
             >
               {/* Judul riset panjang: di desktop tombolnya dinaikkan supaya
                   judul kebaca dua baris, nggak dipotong jadi satu baris. */}
               <SelectTrigger
                 id="research-switcher"
-                className="w-full md:data-[size=default]:h-auto md:min-h-12 md:items-start md:py-2.5 md:whitespace-normal"
+                className="w-full cursor-pointer hover:bg-accent/40 md:data-[size=default]:h-auto md:min-h-12 md:items-start md:py-2.5 md:whitespace-normal"
               >
                 <span className="line-clamp-1 text-left md:line-clamp-2">
                   {activeResearch?.title ??
                     (researches.length ? 'Pilih riset…' : 'Belum ada riset')}
                 </span>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" align="start" side="bottom">
                 {researches.map((r) => (
                   <SelectItem key={r.id} value={String(r.id)}>
                     <span className="max-w-52 truncate">{r.title}</span>
